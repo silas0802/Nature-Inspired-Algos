@@ -2,16 +2,13 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 
-const Graph = ({ graphs }) => {
+const Graph = ({ graphs, xName, yName, labels, noPoints, sorted}) => {
   const svgRef = useRef();
-
   useEffect(() => {
     const svg = d3.select(svgRef.current)
       .attr('width', 500)
       .attr('height', 500)
-      .style('border', '1px solid black')
-      .style('background-color', '#3d466b'); // Apply background color
-
+      
     // Clear previous elements
     svg.selectAll('*').remove();
 
@@ -19,46 +16,63 @@ const Graph = ({ graphs }) => {
     const allPoints = graphs.flat();
     const maxX = Math.max(...allPoints.map(p => p.x));
     const maxY = Math.max(...allPoints.map(p => p.y));
+    const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'cyan', 'magenta'];
+    
     for (let j = 0; j < graphs.length; j++) {
       const points = graphs[j];
+      if (sorted){
+        points.sort((a, b) => a.x - b.x);
+      }
+      lines.push([]);
       for (let i = 0; i < points.length - 1; i++) {
-        lines.push({ x1: points[i].x * 450 / maxX, y1: points[i].y * 450 / maxY, x2: points[i + 1].x * 450 / maxX, y2: points[i + 1].y * 450 / maxY });
+        lines[j].push({ x1: points[i].x, y1: points[i].y, x2: points[i + 1].x, y2: points[i + 1].y });
       }
     }
-    for (let i = 0; i < allPoints.length; i++) {
-      allPoints[i].x = allPoints[i].x * 450 / maxX;
-      allPoints[i].y = allPoints[i].y * 450 / maxY;
-    }
 
+    
     // Add axes
-    const xScale = d3.scaleLinear().domain([0, 450]).range([0, maxX]);
-    const yScale = d3.scaleLinear().domain([0, 450]).range([maxY, 0]);
+    const xScale = d3.scaleLinear().domain([0, maxX]).range([0, 450]);
+    const yScale = d3.scaleLinear().domain([0, maxY]).range([450, 0]);
 
-    const xAxis = d3.axisBottom(xScale).ticks(10);
-    const yAxis = d3.axisLeft(yScale).ticks(10);
+    const xAxis = d3.axisBottom(xScale).ticks(10).tickFormat(d3.format(".0f"));
+    const yAxis = d3.axisLeft(yScale).ticks(10).tickFormat(d3.format(".0f"));
 
     
 
     // Add lines
-    svg.selectAll('line')
-      .data(lines)
-      .enter()
-      .append('line')
-      .attr('class', 'line') // Add class
-      .attr('x1', d => d.x1 + 25)
-      .attr('y1', d => d.y1 + 25)
-      .attr('x2', d => d.x2 + 25)
-      .attr('y2', d => d.y2 + 25);
+    for (let i = 0; i < lines.length; i++) {
+      svg.selectAll(`.line-${i}`)
+        .data(lines[i])
+        .enter()
+        .append('line')
+        .attr('class', `line line-${i}`) // Add class
+        .attr('x1', d => d.x1 * 450 / maxX + 40)
+        .attr('y1', d => 475 - d.y1 * 450 / maxY)
+        .attr('x2', d => d.x2 * 450 / maxX + 40)
+        .attr('y2', d => 475 - d.y2 * 450 / maxY)
+        .attr('stroke', colors[i % colors.length]);
 
+      // Add line labels
+      svg.append('text')
+        .attr('x', 490)
+        .attr('y', 30 + i * 20)
+        .attr('text-anchor', 'end')
+        .attr('font-size', '12px')
+        .attr('fill', colors[i % colors.length])
+        .text(labels[i]);
+    }
+    
     // Add points
-    svg.selectAll('circle')
+    if (!noPoints){
+      svg.selectAll('circle')
       .data(allPoints)
       .enter()
       .append('circle')
       .attr('class', 'point') // Add class
-      .attr('cx', d => d.x + 25)
-      .attr('cy', d => d.y + 25)
-      .attr('r', 5); // Ensure radius is set
+      .attr('cx', d => d.x*450/maxX + 40)
+      .attr('cy', d => 475 - d.y*450/maxY)
+    }
+
 
     svg.append('g')
       .attr('transform', 'translate(40, 475)')
@@ -71,11 +85,11 @@ const Graph = ({ graphs }) => {
     // Add axis labels
     svg.append('text')
       .attr('x', 250)
-      .attr('y', 500)
+      .attr('y', 498)
       .attr('text-anchor', 'middle')
       .attr('font-size', '12px')
       .attr('fill', 'white')
-      .text('X Axis');
+      .text(xName);
 
     svg.append('text')
       .attr('x', -225)
@@ -84,8 +98,8 @@ const Graph = ({ graphs }) => {
       .attr('font-size', '12px')
       .attr('fill', 'white')
       .attr('transform', 'rotate(-90)')
-      .text('Y Axis');
-  }, [graphs]);
+      .text(yName);
+  }, [graphs, noPoints, sorted, xName, yName, labels]);
 
   return <svg ref={svgRef} className="Graph"></svg>; // Apply class
 };
