@@ -1,2 +1,4 @@
 
 API/obj/project.nuget.cache
+/API/obj
+/API/obj/Debug
