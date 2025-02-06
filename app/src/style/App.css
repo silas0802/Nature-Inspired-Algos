@@ -15,10 +15,12 @@
   background-color: #3d466b; /* Ensure background color is applied */
   padding: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for a nice effect */
-  width: 500px; /* Set width */
-  height: 500px; /* Set height */
+  
 }
-
+.BitDiagram {
+  padding: 10px;
+  
+}
 .point {
   fill: rgb(180, 83, 83); /* Set point color */
   r: 5; /* Set point radius */

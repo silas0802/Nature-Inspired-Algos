@@ -28,7 +28,8 @@ const CoordinateSystem = ({ points }) => {
       .attr('x1', d => d.x1)
       .attr('y1', d => d.y1)
       .attr('x2', d => d.x2)
-      .attr('y2', d => d.y2);
+      .attr('y2', d => d.y2)
+      .attr('stroke', d3.rgb(118, 165, 171)); 
 
     // Add points
     svg.selectAll('circle')

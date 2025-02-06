@@ -1,0 +1,23 @@
+#content {
+    display: flex;
+    width: 100vw; /* Take up the full viewport width */
+}
+
+#parameters {
+    margin-right: 20px; /* Add some space between parameters and graphs */
+    flex: 1; /* Allow parameters to take up available space */
+    min-width: 200px; /* Minimum width for parameters */
+    max-width: 400px; /* Maximum width for parameters */
+    display:block;
+    flex-direction: column; /* Ensure parameters are displayed one per line */
+}
+
+#algorithms {
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+
+

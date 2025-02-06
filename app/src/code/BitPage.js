@@ -1,6 +1,8 @@
 // filepath: /c:/Users/silas/Documents/Hobby Projects/Mackrill/app/src/js/Home.js
 import React from 'react';
 import Graph from './Graph';
+import '../style/BitPage.css';
+import BitDiagram from './BitDiagram';
 
 const BitPage = () => {
   const graph1 = [
@@ -28,11 +30,54 @@ const BitPage = () => {
     { x: 900, y: 100 },
 
   ];
+  const bitsEntries = [
+    [0,0,0,0],
+    [0,0,0,1],
+    [0,0,1,0],
+    [0,0,1,1],
+    [0,1,0,0],
+    [0,1,0,1],
+    [0,1,1,0],
+    [0,1,1,1],
+    [1,0,0,0],
+    [1,0,0,1],
+    [1,0,1,0],
+    [1,0,1,1],
+    [1,1,0,0],
+    [1,1,0,1],
+    [1,1,1,0],
+    [1,1,1,1],
+  ];
 
   return (
     <div>
       <h1>Bit Strings</h1>
-      <Graph graphs={[graph1,graph2, graph3]} xName={"Iterations"} yName={"Distance"} labels={["Simulated Anealing", "Ant Colony Simulation", "Evolutiony Algorithm"]} sorted/>
+      <div id="content"> 
+        <div id="parameters">
+          <h2>Parameters</h2>
+          <label htmlFor="bitAmount">Bit Amount:</label>
+          <input type="number" id="bitAmount" placeholder="8" />
+          <label htmlFor="problem">Problem:</label>
+          <select id="problem">
+            <option value="OneMax">OneMax</option>
+            <option value="LeadingOnes">Leading Ones</option>
+          </select>
+          <div id="algorithms">
+            <p>Algorithms:</p>
+            <label>
+              <input type="checkbox" id="ea" checked/>
+              (1+1) EA
+            </label>
+            <label>
+              <input type="checkbox" id="rls" />
+              RLS
+            </label>
+          </div>
+          <button id="run">Run</button>
+        </div>
+        <BitDiagram bitEntries={bitsEntries} />
+        <Graph graphs={[graph1, graph2, graph3]} xName={"Iterations"} yName={"Distance"} labels={["Simulated Anealing", "Ant Colony Simulation", "Evolutiony Algorithm"]} sorted/>
+      </div>
     </div>
   );
 };
