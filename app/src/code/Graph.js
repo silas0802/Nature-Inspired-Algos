@@ -13,7 +13,7 @@ const Graph = ({ graphs, xName, yName, labels, noPoints, sorted}) => {
     svg.selectAll('*').remove();
 
     const lines = [];
-    const allPoints = graphs.flat();
+    const allPoints = graphs.length>1 ? graphs.flat() : graphs[0];
     const maxX = Math.max(...allPoints.map(p => p.x));
     const maxY = Math.max(...allPoints.map(p => p.y));
     const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'cyan', 'magenta'];

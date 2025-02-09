@@ -14,13 +14,14 @@ const BitDiagram = ({ bitEntries }) => {
 
     // Define points array
     const points = [];
-    const bitSum = bitEntries[0].length * (bitEntries[0].length + 1);
     for (let i = 0; i < bitEntries.length; i++) {
-      const bits = bitEntries[i];
-      const vPerc = bits.reduce((acc, bit) => acc + bit, 0) / bits.length;
-
-      
-      points.push({ x: 300/2, y: (1 - vPerc) * 500 });
+      for (let j = 0; j < bitEntries[i].length; j++) {
+        const bits = bitEntries[i][j]; // Correctly access bits
+        
+        const vPerc = bits.reduce((acc, bit) => acc + bit, 0) / bits.length;
+        
+        points.push({ x: 300/2, y: (1 - vPerc) * 500 });
+      }
     }
 
     // Add an ellipse to create the elliptical background
