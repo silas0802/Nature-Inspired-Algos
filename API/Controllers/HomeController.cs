@@ -6,50 +6,31 @@ namespace API.Controllers
     [Route("[controller]")]
     public class HomeController : ControllerBase
     {
-        const int MAX_N = 64;
+        
+        BitStringSimulation simulation = new BitStringSimulation();
+
         [HttpGet("BitstringRun")]
         public ActionResult<IEnumerable<int>> BitstringRun(int N, int algorithmI, int problemI)
         {
-            if (N<=0 || N>MAX_N)
+            if (N<=0 || N>BitStringSimulation.MAX_N) 
             {
-                return BadRequest($"N must be between 1 and {MAX_N}");
+                return BadRequest($"N must be between 1 and {BitStringSimulation.MAX_N}");
             }
-            if (algorithmI <= 0)
+            if (algorithmI <= 0 || algorithmI > MathF.Pow(2, BitStringSimulation.ALGORITHM_COUNT) - 1)
             {
-                return BadRequest("No algorithm selected");
+                return BadRequest("Non valid algorithm selected");
             }
-
-            int algorithmCount = CountSetBits(algorithmI);
-            ulong[][] result = new ulong[algorithmCount][]; //For each algorithm, a list of bitstrings (bitstrings being a list of bits)
-            for (int i = 0; i < algorithmCount; i++)//For each algorithm
+            if (problemI < 0 || problemI >= BitStringSimulation.PROBLEM_COUNT)
             {
-                List<ulong> resultList = new List<ulong>();
-                
-                for (int j = 0; j < 10; j++)
-                {
-                    ulong bitstring = 0;
-                    for (int k = 0; k < N; k++)
-                    {
-                        int val = Random.Shared.Next(2);
-                        bitstring = bitstring | ((ulong)((uint)val) << k);
-                    }
-                    resultList.Add(bitstring);
-                }
-                result[i] = resultList.ToArray();
+                return BadRequest($"algorithm index must be between 0 and {BitStringSimulation.PROBLEM_COUNT}");
             }
-
-            return Ok(result);
-        }
-
-        private int CountSetBits(int n)
-        {
-            int count = 0;
-            while (n > 0)
+            simulation.SetParameters(N, algorithmI, problemI);
+            simulation.RunSimulation();
+            if (simulation.result == null)
             {
-                count += n & 1;
-                n >>= 1;
+                return BadRequest("Simulation failed");
             }
-            return count;
+            return Ok(simulation.result);
         }
     }
 }
