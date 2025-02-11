@@ -153,7 +153,7 @@ const BitPage = () => {
           <button id="run" onClick={handleRunClick}>Run</button>
         </div>
         <BitDiagram bitEntries={bitEntries} />
-        <Graph graphs={graphs} xName={"Iterations"} yName={"Distance"} labels={getLabels()} sorted/>
+        <Graph graphs={graphs} xName={"Iterations"} yName={"Amount of Ones"} labels={getLabels()} sorted/>
       </div>
     </div>
   );

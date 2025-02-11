@@ -1,4 +1,4 @@
-﻿namespace API
+﻿namespace API.Classes
 {
     /// <summary>
     /// A class containing public static helper functions.

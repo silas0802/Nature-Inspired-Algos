@@ -1,14 +1,14 @@
-namespace API
+namespace API.Classes
 {
     public class BitStringSimulation
     {
-        public const int MAX_N = 64; 
+        public const int MAX_N = 64;
         public const int ALGORITHM_COUNT = 2;
         public const int PROBLEM_COUNT = 2;
         private int N;
         private int algorithmI;
         private int problemI;
-        public ulong[][]? result { get; private set;}
+        public ulong[][]? result { get; private set; }
 
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace API
             }
 
             result = GenerateRandomResult(N, algorithmI, 10);
-            
+
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace API
                     for (int k = 0; k < N; k++)
                     {
                         int val = Random.Shared.Next(2);
-                        bitstring = bitstring | ((ulong)((uint)val) << k);
+                        bitstring = bitstring | (ulong)(uint)val << k;
                     }
                     resultList.Add(bitstring);
                 }
@@ -90,6 +90,6 @@ namespace API
             return result;
         }
 
-        
+
     }
 }
