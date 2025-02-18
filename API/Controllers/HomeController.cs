@@ -19,11 +19,11 @@ namespace API.Controllers
             }
             if (algorithmI <= 0 || algorithmI > MathF.Pow(2, BitStringSimulation.ALGORITHM_COUNT) - 1)
             {
-                return BadRequest("Non valid algorithm selected");
+                return BadRequest("Invalid algorithm selected");
             }
             if (problemI < 0 || problemI >= BitStringSimulation.PROBLEM_COUNT)
             {
-                return BadRequest($"algorithm index must be between 0 and {BitStringSimulation.PROBLEM_COUNT}");
+                return BadRequest($"Algorithm index must be between 0 and {BitStringSimulation.PROBLEM_COUNT}");
             }
             simulation.SetParameters(N, algorithmI, problemI);
             simulation.RunSimulation();
