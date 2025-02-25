@@ -9,12 +9,12 @@ const BitPage = () => {
   const [graphs, setGraphs] = useState([[{x: 0, y: 0}, {x: 50, y:50}]]);
   const [bitEntries, setBitEntries] = useState([[[0,1,1,0], [1,1,1,0]],[[0,0,0,0]]]);
 
-  function CountSetBits(n) {
+  function CountSetBits(value, bitSize) {
     let count = 0;
-    while (n > 0)
-    {
-        count += n & 1;
-        n >>= 1;
+    for (let i = 0; i < bitSize; i++) {
+      if ((value >> i) & 1){
+        count++;
+      }
     }
     return count;
   }
@@ -24,13 +24,13 @@ const BitPage = () => {
       var graph = [];
       for (let j = 0; j < bitlist[a].length; j++) { //For each iteration
         const bitSeq = bitlist[a][j];
-        graph.push({x: j, y: CountSetBits(bitSeq)});
+        graph.push({x: j, y: CountSetBits(bitSeq, parseInt(document.getElementById('bitAmount').value))});
       }
       graphs.push(graph);
     }
     return graphs;
   }
-  function ulongToBitarray(bitarraySize, value) {
+  function ulongToBitarray(value, bitarraySize,) {
     let bitArray = new Array(bitarraySize).fill(0);
     for (let i = 0; i < bitarraySize; i++) {
         bitArray[bitarraySize - 1 - i] = (value >> i) & 1;
@@ -43,7 +43,7 @@ const BitPage = () => {
       var entry = [];
       for (let j = 0; j < bitlist[a].length; j++) { //For each iteration
         const bitSeq = bitlist[a][j];
-        entry.push(ulongToBitarray(parseInt(document.getElementById('bitAmount').value), bitSeq));
+        entry.push(ulongToBitarray(bitSeq, parseInt(document.getElementById('bitAmount').value)));
       }
       entries.push(entry);
     }

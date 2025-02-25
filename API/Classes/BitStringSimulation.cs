@@ -55,8 +55,28 @@ namespace API.Classes
                 result = null;
                 return;
             }
+            int bitstring = algorithmI;
+            result = new ulong [Utility.CountSetBits((ulong)algorithmI)][];
 
-            result = GenerateRandomResult(N, algorithmI, 10);
+            int currentAlgo = 0;
+            for (int i = 0; i < ALGORITHM_COUNT; i++)
+            {
+                if ((algorithmI & (1 << i)) != 0)
+                {
+                    switch (i)
+                    {
+                        case 0:
+                            result[currentAlgo] = OneOneEAAlgo.Run(N);
+                            currentAlgo++;
+                            break;
+                        case 1:
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                
+            }
 
         }
 
@@ -69,7 +89,7 @@ namespace API.Classes
         /// <returns>A jagged array of ulong representing the generated bit strings.</returns>
         private ulong[][] GenerateRandomResult(int N, int algorithmI, int iterations)
         {
-            int algorithmCount = Utility.CountSetBits(algorithmI);
+            int algorithmCount = Utility.CountSetBits((ulong)algorithmI);
             ulong[][] result = new ulong[algorithmCount][]; //For each algorithm, a list of bitstrings (bitstrings being a list of bits)
             for (int i = 0; i < algorithmCount; i++)//For each algorithm
             {

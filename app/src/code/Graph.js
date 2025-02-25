@@ -15,7 +15,7 @@ const Graph = ({ graphs, xName, yName, labels, noPoints, sorted}) => {
     const lines = [];
     const allPoints = graphs.length>1 ? graphs.flat() : graphs[0];
     const maxX = Math.max(...allPoints.map(p => p.x));
-    const maxY = Math.max(...allPoints.map(p => p.y));
+    const maxY = Math.max(8,Math.max(...allPoints.map(p => p.y)));
     const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'cyan', 'magenta'];
     
     for (let j = 0; j < graphs.length; j++) {

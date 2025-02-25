@@ -1,25 +1,38 @@
-﻿namespace API.Classes
+﻿using System;
+
+namespace API.Classes
 {
     /// <summary>
     /// A class containing public static helper functions.
     /// </summary>
     public class Utility
     {
+        static Random random = new Random();
 
         /// <summary>
         /// Counts the number of set bits in an integer.
         /// </summary>
         /// <param name="n">The integer to count set bits in.</param>
         /// <returns>The number of set bits.</returns>
-        public static int CountSetBits(int n)
+        public static int CountSetBits(ulong n)
         {
-            int count = 0;
+            ulong count = 0;
             while (n > 0)
             {
                 count += n & 1;
                 n >>= 1;
             }
-            return count;
+            return (int)count;
+        }
+
+        public static ulong InitializeRandomBinaryString(int length)
+        {
+            ulong value = 0;
+            for (int i = 0; i < length; i++)
+            {
+                value |= (ulong)(uint)random.Next(2) << i;
+            }
+            return value;
         }
 
     }
