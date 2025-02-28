@@ -1,4 +1,4 @@
-﻿using API.Classes;
+﻿using API.Classes.BitStrings;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -26,7 +26,7 @@ namespace API.Controllers
                 return BadRequest($"Algorithm index must be between 0 and {BitStringSimulation.PROBLEM_COUNT}");
             }
             simulation.SetParameters(N, algorithmI, problemI);
-            simulation.RunSimulation();
+            simulation.HandleSimulations();
             if (simulation.result == null)
             {
                 return BadRequest("Simulation failed");

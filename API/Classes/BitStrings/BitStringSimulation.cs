@@ -1,14 +1,17 @@
-namespace API.Classes
+using System.Diagnostics;
+
+namespace API.Classes.BitStrings
 {
     public class BitStringSimulation
     {
         public const int MAX_N = 64;
         public const int ALGORITHM_COUNT = 2;
         public const int PROBLEM_COUNT = 2;
+        public const int MAX_ITERATIONS = 1000;
         private int N;
         private int algorithmI;
         private int problemI;
-        public ulong[][]? result { get; private set; }
+        public int[][][]? result { get; private set; }
 
 
         /// <summary>
@@ -47,7 +50,7 @@ namespace API.Classes
         /// <summary>
         /// Runs the bit string simulation. Result is stored in this.result
         /// </summary>
-        public void RunSimulation()
+        public void HandleSimulations()
         {
             if (!ValidateInput())
             {
@@ -56,54 +59,97 @@ namespace API.Classes
                 return;
             }
             int bitstring = algorithmI;
-            result = new ulong [Utility.CountSetBits((ulong)algorithmI)][];
+            result = new int[Utility.CountSetBits((ulong)algorithmI)][][];
 
             int currentAlgo = 0;
+            BitProblem selectedProblem;
+            switch (problemI)
+            {
+                case 0:
+                    selectedProblem = new MaxOnesProblem();
+                    break;
+                case 1:
+                    selectedProblem = new LeadingOnesProblem();
+                    break;
+                default:
+                    result = null;
+                    Console.WriteLine("Failed to select problem");
+                    return;
+            }
+            int[] startValue = Utility.InitializeRandomBinaryString(N);
             for (int i = 0; i < ALGORITHM_COUNT; i++)
             {
-                if ((algorithmI & (1 << i)) != 0)
+                if ((algorithmI & 1 << i) != 0)
                 {
                     switch (i)
                     {
                         case 0:
-                            result[currentAlgo] = OneOneEAAlgo.Run(N);
+                            result[currentAlgo] = RunSimulationPreset(startValue, new OneOneEAAlgo(), selectedProblem);
                             currentAlgo++;
                             break;
                         case 1:
+                            result[currentAlgo] = RunSimulationPreset(startValue, new RLSAlgo(), selectedProblem);
+                            currentAlgo++;
                             break;
                         default:
                             break;
                     }
                 }
-                
+
             }
 
         }
+        private int[][] RunSimulationPreset(int[] startValue, BitAlgorithm algorithm, BitProblem problem)
+        {
+            List<int[]> result = new List<int[]>();
+            result.Add(startValue);
+            int maxIterations = 1000;
+
+            for (int i = 0; i < maxIterations; i++)
+            {
+                int[] bestRes = result[result.Count - 1];
+                int[] mutatedRes = algorithm.Mutate(bestRes);
+                if (problem.FitnessCompare(bestRes, mutatedRes))
+                {
+                    result.Add(mutatedRes);
+                }
+                else
+                {
+                    result.Add(bestRes);
+                }
+                Debug.WriteLine($"Iteration {i}: {Utility.CountSetBits(result[result.Count - 1])}");
+                if (Utility.CountSetBits(result[result.Count - 1]) == N)
+                {
+                    break;
+                }
+            }
+
+            return result.ToArray();
+        }
 
         /// <summary>
-        /// Generates a random result based on the specified parameters.
+        /// Generates a random result based on the specified parameters. Used for testing.
         /// </summary>
         /// <param name="N">The length of the bit string.</param>
         /// <param name="algorithmI">The algorithm index.</param>
         /// <param name="iterations">The number of iterations.</param>
-        /// <returns>A jagged array of ulong representing the generated bit strings.</returns>
-        private ulong[][] GenerateRandomResult(int N, int algorithmI, int iterations)
+        /// <returns>A jagged array of generated bit arrays.</returns>
+        private int[][][] GenerateRandomResult(int N, int algorithmI, int iterations)
         {
             int algorithmCount = Utility.CountSetBits((ulong)algorithmI);
-            ulong[][] result = new ulong[algorithmCount][]; //For each algorithm, a list of bitstrings (bitstrings being a list of bits)
+            int[][][] result = new int[algorithmCount][][]; //For each algorithm, a list of bitstrings (bitstrings being a list of bits)
             for (int i = 0; i < algorithmCount; i++)//For each algorithm
             {
-                List<ulong> resultList = new List<ulong>();
+                List<int[]> resultList = new List<int[]>();
 
                 for (int j = 0; j < iterations; j++)
                 {
-                    ulong bitstring = 0;
+                    int[] bitarray = new int[N];
                     for (int k = 0; k < N; k++)
                     {
-                        int val = Random.Shared.Next(2);
-                        bitstring = bitstring | (ulong)(uint)val << k;
+                        bitarray[k] = Random.Shared.Next(2);
                     }
-                    resultList.Add(bitstring);
+                    resultList.Add(bitarray);
                 }
                 result[i] = resultList.ToArray();
             }

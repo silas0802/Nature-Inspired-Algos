@@ -24,15 +24,23 @@ namespace API.Classes
             }
             return (int)count;
         }
-
-        public static ulong InitializeRandomBinaryString(int length)
+        public static int CountSetBits(int[] bitarray)
         {
-            ulong value = 0;
+            int count = 0;
+            for (int i = 0; i < bitarray.Length; i++)
+            {
+                count += bitarray[i];
+            }
+            return count;
+        }
+        public static int[] InitializeRandomBinaryString(int length)
+        {
+            int[] result = new int[length];
             for (int i = 0; i < length; i++)
             {
-                value |= (ulong)(uint)random.Next(2) << i;
+                result[i] = random.Next(0, 2);
             }
-            return value;
+            return result;
         }
 
     }

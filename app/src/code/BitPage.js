@@ -9,47 +9,52 @@ const BitPage = () => {
   const [graphs, setGraphs] = useState([[{x: 0, y: 0}, {x: 50, y:50}]]);
   const [bitEntries, setBitEntries] = useState([[[0,1,1,0], [1,1,1,0]],[[0,0,0,0]]]);
 
-  function CountSetBits(value, bitSize) {
+  function CountSetBits(bitArray) {
     let count = 0;
-    for (let i = 0; i < bitSize; i++) {
-      if ((value >> i) & 1){
+    for (let i = 0; i < bitArray.length; i++) {
+      count += bitArray[i];
+    }
+    return count;
+  }
+  function CountLeadingOnes(bitArray) {
+    let count = 0;
+    for (let i = 0; i < bitArray.length; i++) {
+      if (bitArray[i] === 1) {
         count++;
+      } else {
+        break;
       }
     }
     return count;
   }
+
   function bitsToGraphs(bitlist){
     var graphs = [];
     for (let a = 0; a < bitlist.length; a++) { //For each algorithm
       var graph = [];
       for (let j = 0; j < bitlist[a].length; j++) { //For each iteration
-        const bitSeq = bitlist[a][j];
-        graph.push({x: j, y: CountSetBits(bitSeq, parseInt(document.getElementById('bitAmount').value))});
+        const bitArray = bitlist[a][j];
+        let yVal = 0;
+        switch (parseInt(document.getElementById('problem').value)) {
+          case 0:
+            yVal = CountSetBits(bitArray);
+            break;
+          case 1:
+            yVal = CountLeadingOnes(bitArray);
+            break;
+          default:
+            break;          
+        }
+        
+        graph.push({x: j, y: yVal});
       }
       graphs.push(graph);
     }
     return graphs;
   }
-  function ulongToBitarray(value, bitarraySize,) {
-    let bitArray = new Array(bitarraySize).fill(0);
-    for (let i = 0; i < bitarraySize; i++) {
-        bitArray[bitarraySize - 1 - i] = (value >> i) & 1;
-    }
-    return bitArray;
-}
-  function bitsToEntries(bitlist){
-    var entries = [];
-    for (let a = 0; a < bitlist.length; a++) { //For each algorithm
-      var entry = [];
-      for (let j = 0; j < bitlist[a].length; j++) { //For each iteration
-        const bitSeq = bitlist[a][j];
-        entry.push(ulongToBitarray(bitSeq, parseInt(document.getElementById('bitAmount').value)));
-      }
-      entries.push(entry);
-    }
+  
 
-    return entries;
-  }
+  
   function getAlgorithmBits() {
     let val = 0;
     if (eaChecked) {
@@ -60,6 +65,7 @@ const BitPage = () => {
     }
     return val;
   }
+
   function getLabels(){
     let labels = [];
     if (eaChecked) {
@@ -108,9 +114,8 @@ const BitPage = () => {
       const data = await response.json();
       // Handle the response data as needed
       console.log(data);
-      console.log(bitsToEntries(data));
       setGraphs(bitsToGraphs(data));
-      setBitEntries(bitsToEntries(data));
+      setBitEntries(data);
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);
     }
@@ -153,7 +158,12 @@ const BitPage = () => {
           <button id="run" onClick={handleRunClick}>Run</button>
         </div>
         <BitDiagram bitEntries={bitEntries} />
-        <Graph graphs={graphs} xName={"Iterations"} yName={"Amount of Ones"} labels={getLabels()} sorted/>
+        <Graph 
+          graphs={graphs} 
+          xName={"Iterations"} 
+          yName={ parseInt(document.getElementById('problem').value)===1 ? "Leading Ones" : "Amount of Ones"} 
+          labels={getLabels()} 
+          noPoints/>
       </div>
     </div>
   );
