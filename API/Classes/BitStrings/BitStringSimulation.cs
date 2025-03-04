@@ -4,102 +4,106 @@ namespace API.Classes.BitStrings
 {
     public class BitStringSimulation
     {
-        public const int MAX_N = 64;
+        public const int MAX_PROBLEM_SIZE = 1000;
+        public const int MAX_EXPERIMENT_COUNT = 100;
         public const int ALGORITHM_COUNT = 2;
         public const int PROBLEM_COUNT = 2;
         public const int MAX_ITERATIONS = 1000;
-        private int N;
-        private int algorithmI;
-        private int problemI;
-        public int[][][]? result { get; private set; }
+        public int problemSize 
+        { 
+            get => problemSize; 
+            private set 
+            {
+                if (value > MAX_PROBLEM_SIZE || value <= 0)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+                problemSize = value;
+            } 
+        }
+        public int algorithmI
+        {
+            get => algorithmI;
+            private set
+            {
+                if (value > MathF.Pow(2, ALGORITHM_COUNT) - 1 || value <= 0)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+                algorithmI = value;
+            }
+        }
+        public int problemI
+        {
+            get => problemI;
+            private set
+            {
+                if (value > PROBLEM_COUNT || value <= 0)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+                problemI = value;
+            }
+        }
+        public int expCount
+        {
+            get => expCount;
+            private set
+            {
+                if (value > MAX_EXPERIMENT_COUNT || value <= 1)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+                expCount = value;
+            }
+        }
 
 
         /// <summary>
         /// Sets the parameters for the simulation.
         /// </summary>
-        /// <param name="N">The length of the bit string.</param>
+        /// <param name="problemSize">The length of the bit string.</param>
         /// <param name="algorithmI">The algorithm indexes, each bit corresponds to an algorithm.</param>
         /// <param name="problemI">The problem index.</param>
-        public void SetParameters(int N, int algorithmI, int problemI)
+        public void SetParametersForDetailed(int problemSize, int algorithmI, int problemI)
         {
-            this.N = N;
+            this.problemSize = problemSize;
             this.algorithmI = algorithmI;
             this.problemI = problemI;
         }
-        /// <summary>
-        /// Validates the input parameters.
-        /// </summary>
-        /// <returns>True if the input parameters are valid, otherwise false.</returns>
-        private bool ValidateInput()
+        public void SetParametersForMultiExperiment(int problemSize, int expCount, int algorithmI, int problemI)
         {
-            if (N <= 0 || N > MAX_N)
-            {
-                return false;
-            }
-            if (algorithmI <= 0 || algorithmI > MathF.Pow(2, ALGORITHM_COUNT) - 1)
-            {
-                return false;
-            }
-            if (problemI < 0 || problemI >= PROBLEM_COUNT)
-            {
-                return false;
-            }
-            return true;
+            SetParametersForDetailed(problemSize, algorithmI, problemI);
+            this.expCount = expCount;
         }
+        
 
         /// <summary>
         /// Runs the bit string simulation. Result is stored in this.result
         /// </summary>
-        public void HandleSimulations()
+        public object[] HandleDetailedExperiment()
         {
-            if (!ValidateInput())
-            {
-                Console.WriteLine("Invalid input");
-                result = null;
-                return;
-            }
+            
             int bitstring = algorithmI;
-            result = new int[Utility.CountSetBits((ulong)algorithmI)][][];
+            object[] result = new object[Utility.CountSetBits((ulong)algorithmI)];
 
             int currentAlgo = 0;
-            BitProblem selectedProblem;
-            switch (problemI)
-            {
-                case 0:
-                    selectedProblem = new MaxOnesProblem();
-                    break;
-                case 1:
-                    selectedProblem = new LeadingOnesProblem();
-                    break;
-                default:
-                    result = null;
-                    Console.WriteLine("Failed to select problem");
-                    return;
-            }
-            int[] startValue = Utility.InitializeRandomBinaryString(N);
+            BitProblem selectedProblem = GetProblem(problemI);
+            
+            int[] startValue = Utility.InitializeRandomBinaryString(problemSize);
             for (int i = 0; i < ALGORITHM_COUNT; i++)
             {
                 if ((algorithmI & 1 << i) != 0)
                 {
-                    switch (i)
-                    {
-                        case 0:
-                            result[currentAlgo] = RunSimulationPreset(startValue, new OneOneEAAlgo(), selectedProblem);
-                            currentAlgo++;
-                            break;
-                        case 1:
-                            result[currentAlgo] = RunSimulationPreset(startValue, new RLSAlgo(), selectedProblem);
-                            currentAlgo++;
-                            break;
-                        default:
-                            break;
-                    }
+                    result[currentAlgo] = RunDetailedSimulationPreset(startValue, GetAlgorithm(i), selectedProblem);
+                    currentAlgo++;
                 }
 
             }
+            return result;
 
         }
-        private int[][] RunSimulationPreset(int[] startValue, BitAlgorithm algorithm, BitProblem problem)
+        private int[][] RunDetailedSimulationPreset(int[] startValue, BitAlgorithm algorithm, BitProblem problem)
         {
             List<int[]> result = new List<int[]>();
             result.Add(startValue);
@@ -118,13 +122,38 @@ namespace API.Classes.BitStrings
                     result.Add(bestRes);
                 }
                 Debug.WriteLine($"Iteration {i}: {Utility.CountSetBits(result[result.Count - 1])}");
-                if (Utility.CountSetBits(result[result.Count - 1]) == N)
+                if (Utility.CountSetBits(result[result.Count - 1]) == problemSize)
                 {
                     break;
                 }
             }
 
             return result.ToArray();
+        }
+
+        private BitAlgorithm GetAlgorithm(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return new OneOneEAAlgo();
+                case 1:
+                    return new RLSAlgo();
+                default:
+                    throw new IndexOutOfRangeException($"No algorithm with index: {index}");
+            }
+        }
+        private BitProblem GetProblem(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return new MaxOnesProblem();
+                case 1:
+                    return new LeadingOnesProblem();
+                default:
+                    throw new ArgumentOutOfRangeException($"No algorithm with index: {index}");
+            }
         }
 
         /// <summary>
