@@ -5,56 +5,61 @@ namespace API.Classes.BitStrings
     public class BitStringSimulation
     {
         public const int MAX_PROBLEM_SIZE = 1000;
-        public const int MAX_EXPERIMENT_COUNT = 100;
+        public const int MAX_EXPERIMENT_COUNT = 1000;
         public const int ALGORITHM_COUNT = 2;
         public const int PROBLEM_COUNT = 2;
         public const int MAX_ITERATIONS = 1000;
-        public int problemSize 
-        { 
-            get => problemSize; 
-            private set 
+        private int _problemSize;
+        private int _algorithmI;
+        private int _problemI;
+        private int _expCount;
+
+        public int problemSize
+        {
+            get => _problemSize;
+            private set
             {
                 if (value > MAX_PROBLEM_SIZE || value <= 0)
                 {
                     throw new ArgumentOutOfRangeException();
                 }
-                problemSize = value;
-            } 
+                _problemSize = value;
+            }
         }
         public int algorithmI
         {
-            get => algorithmI;
+            get => _algorithmI;
             private set
             {
                 if (value > MathF.Pow(2, ALGORITHM_COUNT) - 1 || value <= 0)
                 {
                     throw new ArgumentOutOfRangeException();
                 }
-                algorithmI = value;
+                _algorithmI = value;
             }
         }
         public int problemI
         {
-            get => problemI;
+            get => _problemI;
             private set
             {
-                if (value > PROBLEM_COUNT || value <= 0)
+                if (value >= PROBLEM_COUNT || value < 0)
                 {
                     throw new ArgumentOutOfRangeException();
                 }
-                problemI = value;
+                _problemI = value;
             }
         }
         public int expCount
         {
-            get => expCount;
+            get => _expCount;
             private set
             {
                 if (value > MAX_EXPERIMENT_COUNT || value <= 1)
                 {
                     throw new ArgumentOutOfRangeException();
                 }
-                expCount = value;
+                _expCount = value;
             }
         }
 
@@ -79,13 +84,13 @@ namespace API.Classes.BitStrings
         
 
         /// <summary>
-        /// Runs the bit string simulation. Result is stored in this.result
+        /// Runs the experiment results for each algorithm.
         /// </summary>
-        public object[] HandleDetailedExperiment()
+        public T[] RunExperiment<T>(Func<int[],BitAlgorithm,BitProblem, T> simulation)
         {
             
             int bitstring = algorithmI;
-            object[] result = new object[Utility.CountSetBits((ulong)algorithmI)];
+            T[] result = new T[Utility.CountSetBits((ulong)algorithmI)];
 
             int currentAlgo = 0;
             BitProblem selectedProblem = GetProblem(problemI);
@@ -95,21 +100,21 @@ namespace API.Classes.BitStrings
             {
                 if ((algorithmI & 1 << i) != 0)
                 {
-                    result[currentAlgo] = RunDetailedSimulationPreset(startValue, GetAlgorithm(i), selectedProblem);
+                    result[currentAlgo] = simulation(startValue, GetAlgorithm(i), selectedProblem);
                     currentAlgo++;
                 }
 
             }
+            Debug.WriteLine($"Experiment finished with start value: {{{string.Join(',',startValue)}}}");
             return result;
 
         }
-        private int[][] RunDetailedSimulationPreset(int[] startValue, BitAlgorithm algorithm, BitProblem problem)
+        public int[][] RunDetailedSimulation(int[] startValue, BitAlgorithm algorithm, BitProblem problem)
         {
             List<int[]> result = new List<int[]>();
             result.Add(startValue);
-            int maxIterations = 1000;
 
-            for (int i = 0; i < maxIterations; i++)
+            for (int i = 0; i < MAX_ITERATIONS; i++)
             {
                 int[] bestRes = result[result.Count - 1];
                 int[] mutatedRes = algorithm.Mutate(bestRes);
@@ -121,7 +126,7 @@ namespace API.Classes.BitStrings
                 {
                     result.Add(bestRes);
                 }
-                Debug.WriteLine($"Iteration {i}: {Utility.CountSetBits(result[result.Count - 1])}");
+                //Debug.WriteLine($"Iteration {i}: {Utility.CountSetBits(result[result.Count - 1])}");
                 if (Utility.CountSetBits(result[result.Count - 1]) == problemSize)
                 {
                     break;
@@ -129,6 +134,33 @@ namespace API.Classes.BitStrings
             }
 
             return result.ToArray();
+        }
+        public float RunMultiSimulation(int[] startValue, BitAlgorithm algorithm, BitProblem problem)
+        {
+            int[] results = new int[expCount];
+            for (int i = 0; i < expCount; i++)
+            {
+                int[] bestRes = startValue;
+                for (int j = 1; j < MAX_ITERATIONS; j++)
+                {
+                    int[] mutatedRes = algorithm.Mutate(bestRes);
+                    if (problem.FitnessCompare(bestRes, mutatedRes))
+                    {
+                        bestRes = mutatedRes;
+                    }
+
+
+                    if (Utility.CountSetBits(bestRes) == problemSize)
+                    {
+                        results[i] = j;
+                        //Debug.WriteLine($"Experiment {i}, Iteration: {j}");
+                        break;
+                    }
+                }
+            }
+            float res = (float)results.Sum() / expCount;
+            Debug.WriteLine($"Average: {res}");
+            return res;
         }
 
         private BitAlgorithm GetAlgorithm(int index)
@@ -152,12 +184,12 @@ namespace API.Classes.BitStrings
                 case 1:
                     return new LeadingOnesProblem();
                 default:
-                    throw new ArgumentOutOfRangeException($"No algorithm with index: {index}");
+                    throw new IndexOutOfRangeException($"No algorithm with index: {index}");
             }
         }
 
         /// <summary>
-        /// Generates a random result based on the specified parameters. Used for testing.
+        /// !!!Deprecated!!! Generates a random result based on the specified parameters. Used for testing.
         /// </summary>
         /// <param name="N">The length of the bit string.</param>
         /// <param name="algorithmI">The algorithm index.</param>

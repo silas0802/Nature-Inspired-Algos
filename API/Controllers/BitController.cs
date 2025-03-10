@@ -11,7 +11,7 @@ namespace API.Controllers
         BitStringSimulation simulation = new BitStringSimulation();
 
         [HttpGet("BitstringRun")]
-        public ActionResult<IEnumerable<int>> BitstringRun(int maxProblemSize, int algorithmI, int problemI)
+        public ActionResult<int[][][]> BitstringRun(int maxProblemSize, int algorithmI, int problemI)
         {
             if (maxProblemSize<=0 || maxProblemSize>BitStringSimulation.MAX_PROBLEM_SIZE) 
             {
@@ -26,7 +26,7 @@ namespace API.Controllers
                 return BadRequest($"Algorithm index must be between 0 and {BitStringSimulation.PROBLEM_COUNT}");
             }
             simulation.SetParametersForDetailed(maxProblemSize, algorithmI, problemI);
-            int[][][]? result = simulation.HandleDetailedExperiment();
+            int[][][]? result = simulation.RunExperiment(simulation.RunDetailedSimulation);
             if (result == null)
             {
                 return BadRequest("Simulation failed");
@@ -35,7 +35,7 @@ namespace API.Controllers
         }
 
         [HttpGet("BitstringExp")]
-        public ActionResult<IEnumerable<int>> BitstringExp(int maxProblemSize, int expCount, int algorithmI, int problemI)
+        public ActionResult<int[]> BitstringExp(int maxProblemSize, int expCount, int algorithmI, int problemI)
         {
             if (maxProblemSize <= 0 || maxProblemSize > BitStringSimulation.MAX_PROBLEM_SIZE)
             {
@@ -53,8 +53,9 @@ namespace API.Controllers
             {
                 return BadRequest($"Algorithm index must be between 0 and {BitStringSimulation.PROBLEM_COUNT}");
             }
-            simulation.SetParametersForDetailed(maxProblemSize, algorithmI, problemI);
-            object? result = simulation.HandleDetailedExperiment();
+            simulation.SetParametersForMultiExperiment(maxProblemSize, expCount, algorithmI, problemI);
+            float[]? result = simulation.RunExperiment(simulation.RunMultiSimulation);
+
             if (result == null)
             {
                 return BadRequest("Simulation failed");
