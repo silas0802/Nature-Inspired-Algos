@@ -96,7 +96,7 @@ const BitPage = () => {
       return;
     }
 
-    const url = `https://localhost:7143/Home/BitstringRun?N=${bitAmount}&algorithmI=${algorithms}&problemI=${problem}`;
+    const url = `https://localhost:7143/Bit/BitstringRun?maxProblemSize=${bitAmount}&algorithmI=${algorithms}&problemI=${problem}`;
     // Fetch data from the server
     try {
       const response = await fetch(url, {
@@ -161,7 +161,7 @@ const BitPage = () => {
         <Graph 
           graphs={graphs} 
           xName={"Iterations"} 
-          yName={ parseInt(document.getElementById('problem').value)===1 ? "Leading Ones" : "Amount of Ones"} 
+          yName={ "Amount of Ones"} 
           labels={getLabels()} 
           noPoints/>
       </div>
