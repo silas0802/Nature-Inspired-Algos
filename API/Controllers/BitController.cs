@@ -54,7 +54,7 @@ namespace API.Controllers
                 return BadRequest($"Algorithm index must be between 0 and {BitStringSimulation.PROBLEM_COUNT}");
             }
             simulation.SetParametersForMultiExperiment(maxProblemSize, expCount, algorithmI, problemI);
-            float[]? result = simulation.RunExperiment(simulation.RunMultiSimulation);
+            float[][]? result = simulation.RunExperiment(simulation.RunMultiSimulation);
 
             if (result == null)
             {

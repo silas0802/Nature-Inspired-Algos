@@ -43,5 +43,15 @@ namespace API.Classes
             return result;
         }
 
+        public static int[] CloneBitArrayPart(int[] array, int length)
+        {
+            int[] result = new int[length];
+            for (int i = 0; i < length; i++)
+            {
+                result[i] = array[i];
+            }
+            return result;
+        }
+
     }
 }

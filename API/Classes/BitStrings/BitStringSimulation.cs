@@ -6,9 +6,10 @@ namespace API.Classes.BitStrings
     {
         public const int MAX_PROBLEM_SIZE = 1000;
         public const int MAX_EXPERIMENT_COUNT = 1000;
+        public const int MAX_EXPERIMENT_STEPS = 30;
         public const int ALGORITHM_COUNT = 3;
         public const int PROBLEM_COUNT = 2;
-        public const int MAX_ITERATIONS = 1000;
+        public const int MAX_ITERATIONS = 50000;
         private int _problemSize;
         private int _algorithmI;
         private int _problemI;
@@ -136,33 +137,43 @@ namespace API.Classes.BitStrings
 
             return result.ToArray();
         }
-        public float RunMultiSimulation(int[] startValue, BitAlgorithm algorithm, BitProblem problem)
+        public float[] RunMultiSimulation(int[] startValue, BitAlgorithm algorithm, BitProblem problem)
         {
-            int[] results = new int[expCount];
-            for (int i = 0; i < expCount; i++)
+            float[] results = new float[MAX_EXPERIMENT_STEPS];
+            for (int k = 0; k < MAX_EXPERIMENT_STEPS; k++)
             {
-                int[] bestRes = startValue;
-                for (int j = 1; j < MAX_ITERATIONS; j++)
+                int[] stepStartVal = Utility.CloneBitArrayPart(startValue, problemSize*(k+1)/MAX_EXPERIMENT_STEPS);
+                int[] stepResults = new int[expCount];
+                for (int i = 0; i < expCount; i++)
                 {
-                    int[] mutatedRes = algorithm.Mutate(bestRes);
-                    if (problem.FitnessCompare(bestRes, mutatedRes))
+                    int[] bestRes = stepStartVal;
+                    for (int j = 1; j < MAX_ITERATIONS; j++)
                     {
-                        bestRes = mutatedRes;
-                    }
+                        int[] mutatedRes = algorithm.Mutate(bestRes);
+                        if (problem.FitnessCompare(bestRes, mutatedRes))
+                        {
+                            bestRes = mutatedRes;
+                        }
 
 
-                    if (Utility.CountSetBits(bestRes) == problemSize)
-                    {
-                        results[i] = j;
-                        Debug.WriteLine($"Run {i} finished after iteration: {j}");
-                        break;
+                        if (Utility.CountSetBits(bestRes) == problemSize)
+                        {
+                            stepResults[i] = j;
+                            //Debug.WriteLine($"Run {i} finished after iteration: {j}");
+                            break;
+                        }
+                        if (j == MAX_ITERATIONS - 1)
+                        {
+                            Debug.WriteLine($"Failed to find a solution in time");
+                            stepResults[i] = MAX_ITERATIONS;
+                        }
                     }
+                    results[k] = (float)stepResults.Sum() / expCount;
+                    Debug.WriteLine($"For problemsize {bestRes.Length} Average: {results[k]}");
+                    algorithm.ResetAlgorithm();
                 }
-                algorithm.ResetAlgorithm();
             }
-            float res = (float)results.Sum() / expCount;
-            Debug.WriteLine($"Average: {res}");
-            return res;
+            return results;
         }
 
         private BitAlgorithm GetAlgorithm(int index, BitProblem selectedProblem)

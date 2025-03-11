@@ -107,7 +107,7 @@
 
         public override void ResetAlgorithm()
         {
-            InitializePheromone(problemSize);
+            pheromone = InitializePheromone(problemSize);
         }
     }
 }
