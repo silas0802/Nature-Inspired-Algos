@@ -17,4 +17,9 @@ public class RLSAlgo : BitAlgorithm
 
         return mutated;
     }
+
+    public override void ResetAlgorithm()
+    {
+        return;
+    }
 }

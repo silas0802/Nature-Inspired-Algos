@@ -6,7 +6,7 @@ namespace API.Classes.BitStrings
     {
         public const int MAX_PROBLEM_SIZE = 1000;
         public const int MAX_EXPERIMENT_COUNT = 1000;
-        public const int ALGORITHM_COUNT = 2;
+        public const int ALGORITHM_COUNT = 3;
         public const int PROBLEM_COUNT = 2;
         public const int MAX_ITERATIONS = 1000;
         private int _problemSize;
@@ -100,7 +100,7 @@ namespace API.Classes.BitStrings
             {
                 if ((algorithmI & 1 << i) != 0)
                 {
-                    result[currentAlgo] = simulation(startValue, GetAlgorithm(i), selectedProblem);
+                    result[currentAlgo] = simulation(startValue, GetAlgorithm(i, selectedProblem), selectedProblem);
                     currentAlgo++;
                 }
 
@@ -129,6 +129,7 @@ namespace API.Classes.BitStrings
                 //Debug.WriteLine($"Iteration {i}: {Utility.CountSetBits(result[result.Count - 1])}");
                 if (Utility.CountSetBits(result[result.Count - 1]) == problemSize)
                 {
+                    Debug.WriteLine($"Solution found after {i} iterations");
                     break;
                 }
             }
@@ -153,17 +154,18 @@ namespace API.Classes.BitStrings
                     if (Utility.CountSetBits(bestRes) == problemSize)
                     {
                         results[i] = j;
-                        //Debug.WriteLine($"Experiment {i}, Iteration: {j}");
+                        Debug.WriteLine($"Run {i} finished after iteration: {j}");
                         break;
                     }
                 }
+                algorithm.ResetAlgorithm();
             }
             float res = (float)results.Sum() / expCount;
             Debug.WriteLine($"Average: {res}");
             return res;
         }
 
-        private BitAlgorithm GetAlgorithm(int index)
+        private BitAlgorithm GetAlgorithm(int index, BitProblem selectedProblem)
         {
             switch (index)
             {
@@ -171,6 +173,8 @@ namespace API.Classes.BitStrings
                     return new OneOneEAAlgo();
                 case 1:
                     return new RLSAlgo();
+                case 2:
+                    return new MMASAlgo(problemSize, selectedProblem);
                 default:
                     throw new IndexOutOfRangeException($"No algorithm with index: {index}");
             }

@@ -3,4 +3,5 @@
 public abstract class BitAlgorithm
 {
     public abstract int[] Mutate(int[] original);
+    public abstract void ResetAlgorithm();
 }
