@@ -24,7 +24,7 @@ public class OneOneEAAlgo : BitAlgorithm
         return mutated;
     }
 
-    public override void ResetAlgorithm()
+    public override void InitializeAlgorithm(int problemSize)
     {
         return;
     }

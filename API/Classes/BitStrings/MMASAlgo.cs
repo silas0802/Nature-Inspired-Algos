@@ -4,8 +4,8 @@
     {
         private Random random = new Random();
         private BitProblem selectedProblem;
-        public double[,] pheromone;
-        private int problemSize; // Length of the binary string
+        public double[,] pheromone = new double[0,0];
+        private int problemSize = 0; // Length of the binary string
         public int numAnts = 20; // Number of ants
         public double alpha = 1.0; // Pheromone importance
         public double beta = 2.0; // Heuristic importance
@@ -13,11 +13,9 @@
         public double minPheromone = 0.1;
         public double maxPheromone = 10.0;
 
-        public MMASAlgo(int problemSize, BitProblem selectedProblem)
+        public MMASAlgo(BitProblem selectedProblem)
         {
-            this.problemSize = problemSize;
             this.selectedProblem = selectedProblem;
-            pheromone = InitializePheromone(problemSize);
         }
         public override int[] Mutate(int[] original)
         {
@@ -105,8 +103,9 @@
             }
         }
 
-        public override void ResetAlgorithm()
+        public override void InitializeAlgorithm(int problemSize)
         {
+            this.problemSize = problemSize;
             pheromone = InitializePheromone(problemSize);
         }
     }

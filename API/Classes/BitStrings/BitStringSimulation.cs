@@ -14,6 +14,7 @@ namespace API.Classes.BitStrings
         private int _algorithmI;
         private int _problemI;
         private int _expCount;
+        private int _expSteps;
 
         public int problemSize
         {
@@ -56,17 +57,29 @@ namespace API.Classes.BitStrings
             get => _expCount;
             private set
             {
-                if (value > MAX_EXPERIMENT_COUNT || value <= 1)
+                if (value > MAX_EXPERIMENT_COUNT || value <= 0)
                 {
                     throw new ArgumentOutOfRangeException();
                 }
                 _expCount = value;
             }
         }
+        public int expSteps
+        {
+            get => _expSteps;
+            private set
+            {
+                if (value > MAX_EXPERIMENT_STEPS || value <= 0)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+                _expSteps = value;
+            }
+        }
 
 
         /// <summary>
-        /// Sets the parameters for the simulation.
+        /// Sets the parameters for the single/detailed simulation.
         /// </summary>
         /// <param name="problemSize">The length of the bit string.</param>
         /// <param name="algorithmI">The algorithm indexes, each bit corresponds to an algorithm.</param>
@@ -77,16 +90,28 @@ namespace API.Classes.BitStrings
             this.algorithmI = algorithmI;
             this.problemI = problemI;
         }
-        public void SetParametersForMultiExperiment(int problemSize, int expCount, int algorithmI, int problemI)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="maxProblemSize">The maximum length of the bit string.</param>
+        /// <param name="expCount">The amount of experiment repetitions at each problemsize</param>
+        /// <param name="expSteps">How many experiments with different problemsizes will be executed</param>
+        /// <param name="algorithmI">The algorithm indexes, each bit corresponds to an algorithm.</param>
+        /// <param name="problemI">The problem index.</param>
+        public void SetParametersForMultiExperiment(int maxProblemSize, int expCount, int expSteps, int algorithmI, int problemI)
         {
-            SetParametersForDetailed(problemSize, algorithmI, problemI);
+            SetParametersForDetailed(maxProblemSize, algorithmI, problemI);
             this.expCount = expCount;
+            this.expSteps = expSteps;
         }
-        
+
 
         /// <summary>
         /// Runs the experiment results for each algorithm.
         /// </summary>
+        /// <typeparam name="T">The result type for each algorithm.</typeparam>
+        /// <param name="simulation">Which type of simulation to run, e.g: RunDetailedSimulation</param>
+        /// <returns>An experiment result for each algorithm selected</returns>
         public T[] RunExperiment<T>(Func<int[],BitAlgorithm,BitProblem, T> simulation)
         {
             
@@ -110,6 +135,13 @@ namespace API.Classes.BitStrings
             return result;
 
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="startValue">The initial bitarray</param>
+        /// <param name="algorithm">The selected algorithm</param>
+        /// <param name="problem">The selected problem</param>
+        /// <returns>A list of the best solutions at each iteration</returns>
         public int[][] RunDetailedSimulation(int[] startValue, BitAlgorithm algorithm, BitProblem problem)
         {
             List<int[]> result = new List<int[]>();
@@ -137,13 +169,21 @@ namespace API.Classes.BitStrings
 
             return result.ToArray();
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="startValue">The initial bitarray</param>
+        /// <param name="algorithm">The selected algorithm</param>
+        /// <param name="problem">The selected problem</param>
+        /// <returns>A list of average number of iterations to solve the problem at each problemsize.</returns>
         public float[] RunMultiSimulation(int[] startValue, BitAlgorithm algorithm, BitProblem problem)
         {
-            float[] results = new float[MAX_EXPERIMENT_STEPS];
-            for (int k = 0; k < MAX_EXPERIMENT_STEPS; k++)
+            float[] results = new float[expSteps];
+            for (int k = 0; k < expSteps; k++)
             {
-                int[] stepStartVal = Utility.CloneBitArrayPart(startValue, problemSize*(k+1)/MAX_EXPERIMENT_STEPS);
+                int[] stepStartVal = Utility.CloneBitArrayPart(startValue, problemSize*(k+1)/expSteps);
                 int[] stepResults = new int[expCount];
+                algorithm.InitializeAlgorithm(stepStartVal.Length);
                 for (int i = 0; i < expCount; i++)
                 {
                     int[] bestRes = stepStartVal;
@@ -156,7 +196,7 @@ namespace API.Classes.BitStrings
                         }
 
 
-                        if (Utility.CountSetBits(bestRes) == problemSize)
+                        if (Utility.CountSetBits(bestRes) == bestRes.Length)
                         {
                             stepResults[i] = j;
                             //Debug.WriteLine($"Run {i} finished after iteration: {j}");
@@ -164,18 +204,24 @@ namespace API.Classes.BitStrings
                         }
                         if (j == MAX_ITERATIONS - 1)
                         {
-                            Debug.WriteLine($"Failed to find a solution in time");
+                            Debug.WriteLine($"Failed to find a solution in time for problemsize {stepStartVal.Length}");
                             stepResults[i] = MAX_ITERATIONS;
                         }
                     }
-                    results[k] = (float)stepResults.Sum() / expCount;
-                    Debug.WriteLine($"For problemsize {bestRes.Length} Average: {results[k]}");
-                    algorithm.ResetAlgorithm();
+                    
                 }
+                results[k] = (float)stepResults.Sum() / expCount;
+                Debug.WriteLine($"For problemsize {stepStartVal.Length} Average: {results[k]}");
             }
             return results;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="selectedProblem"></param>
+        /// <returns>A new BitAlgorithm object of given index</returns>
+        /// <exception cref="IndexOutOfRangeException"></exception>
         private BitAlgorithm GetAlgorithm(int index, BitProblem selectedProblem)
         {
             switch (index)
@@ -185,11 +231,17 @@ namespace API.Classes.BitStrings
                 case 1:
                     return new RLSAlgo();
                 case 2:
-                    return new MMASAlgo(problemSize, selectedProblem);
+                    return new MMASAlgo(selectedProblem);
                 default:
                     throw new IndexOutOfRangeException($"No algorithm with index: {index}");
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns>A new BitProblem object of given index</returns>
+        /// <exception cref="IndexOutOfRangeException"></exception>
         private BitProblem GetProblem(int index)
         {
             switch (index)
@@ -202,36 +254,5 @@ namespace API.Classes.BitStrings
                     throw new IndexOutOfRangeException($"No algorithm with index: {index}");
             }
         }
-
-        /// <summary>
-        /// !!!Deprecated!!! Generates a random result based on the specified parameters. Used for testing.
-        /// </summary>
-        /// <param name="N">The length of the bit string.</param>
-        /// <param name="algorithmI">The algorithm index.</param>
-        /// <param name="iterations">The number of iterations.</param>
-        /// <returns>A jagged array of generated bit arrays.</returns>
-        private int[][][] GenerateRandomResult(int N, int algorithmI, int iterations)
-        {
-            int algorithmCount = Utility.CountSetBits((ulong)algorithmI);
-            int[][][] result = new int[algorithmCount][][]; //For each algorithm, a list of bitstrings (bitstrings being a list of bits)
-            for (int i = 0; i < algorithmCount; i++)//For each algorithm
-            {
-                List<int[]> resultList = new List<int[]>();
-
-                for (int j = 0; j < iterations; j++)
-                {
-                    int[] bitarray = new int[N];
-                    for (int k = 0; k < N; k++)
-                    {
-                        bitarray[k] = Random.Shared.Next(2);
-                    }
-                    resultList.Add(bitarray);
-                }
-                result[i] = resultList.ToArray();
-            }
-            return result;
-        }
-
-
     }
 }

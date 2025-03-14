@@ -53,5 +53,34 @@ namespace API.Classes
             return result;
         }
 
+        /// <summary>
+        /// !!!Deprecated!!! Generates a random result based on the specified parameters. Used for testing.
+        /// </summary>
+        /// <param name="N">The length of the bit string.</param>
+        /// <param name="algorithmI">The algorithm index.</param>
+        /// <param name="iterations">The number of iterations.</param>
+        /// <returns>A jagged array of generated bit arrays.</returns>
+        private int[][][] GenerateRandomResult(int N, int algorithmI, int iterations)
+        {
+            int algorithmCount = Utility.CountSetBits((ulong)algorithmI);
+            int[][][] result = new int[algorithmCount][][]; //For each algorithm, a list of bitstrings (bitstrings being a list of bits)
+            for (int i = 0; i < algorithmCount; i++)//For each algorithm
+            {
+                List<int[]> resultList = new List<int[]>();
+
+                for (int j = 0; j < iterations; j++)
+                {
+                    int[] bitarray = new int[N];
+                    for (int k = 0; k < N; k++)
+                    {
+                        bitarray[k] = Random.Shared.Next(2);
+                    }
+                    resultList.Add(bitarray);
+                }
+                result[i] = resultList.ToArray();
+            }
+            return result;
+        }
+
     }
 }
