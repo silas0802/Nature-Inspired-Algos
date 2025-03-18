@@ -146,7 +146,7 @@ namespace API.Classes.BitStrings
         {
             List<int[]> result = new List<int[]>();
             result.Add(startValue);
-
+            algorithm.InitializeAlgorithm(startValue.Length);
             for (int i = 0; i < MAX_ITERATIONS; i++)
             {
                 int[] bestRes = result[result.Count - 1];
