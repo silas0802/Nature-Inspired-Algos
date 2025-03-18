@@ -179,6 +179,7 @@ namespace API.Classes.BitStrings
         public float[] RunMultiSimulation(int[] startValue, BitAlgorithm algorithm, BitProblem problem)
         {
             float[] results = new float[expSteps];
+            bool fail = false;
             for (int k = 0; k < expSteps; k++)
             {
                 int[] stepStartVal = Utility.CloneBitArrayPart(startValue, problemSize*(k+1)/expSteps);
@@ -186,6 +187,12 @@ namespace API.Classes.BitStrings
                 algorithm.InitializeAlgorithm(stepStartVal.Length);
                 for (int i = 0; i < expCount; i++)
                 {
+                    if (fail)
+                    {
+                        stepResults[i] = MAX_ITERATIONS;
+                        continue;
+                    }
+
                     int[] bestRes = stepStartVal;
                     for (int j = 1; j < MAX_ITERATIONS; j++)
                     {
@@ -205,9 +212,13 @@ namespace API.Classes.BitStrings
                         if (j == MAX_ITERATIONS - 1)
                         {
                             Debug.WriteLine($"Failed to find a solution in time for problemsize {stepStartVal.Length}");
+                            
                             stepResults[i] = MAX_ITERATIONS;
+                            fail = true;
+                            
                         }
                     }
+                    
                     
                 }
                 results[k] = (float)stepResults.Sum() / expCount;
