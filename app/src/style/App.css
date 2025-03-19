@@ -21,10 +21,7 @@
   padding: 10px;
   
 }
-.point {
-  fill: rgb(180, 83, 83); /* Set point color */
-  r: 5; /* Set point radius */
-}
+
 
 .line {
   stroke-width: 2; /* Set line width */

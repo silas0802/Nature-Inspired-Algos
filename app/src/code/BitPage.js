@@ -6,8 +6,10 @@ import BitDiagram from './BitDiagram';
 const BitPage = () => {
   const [eaChecked, setEaChecked] = useState(true);
   const [rlsChecked, setRlsChecked] = useState(false);
-  const [graphs, setGraphs] = useState([[{x: 0, y: 0}, {x: 50, y:50}]]);
-  const [bitEntries, setBitEntries] = useState([[[0,1,1,0], [1,1,1,0]],[[0,0,0,0]]]);
+  const [mmasChecked, setMmasChecked] = useState(false);
+  const [graphs, setGraphs] = useState([]);
+  const [bitEntries, setBitEntries] = useState([]);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   function CountSetBits(bitArray) {
     let count = 0;
@@ -53,8 +55,6 @@ const BitPage = () => {
     return graphs;
   }
   
-
-  
   function getAlgorithmBits() {
     let val = 0;
     if (eaChecked) {
@@ -62,6 +62,9 @@ const BitPage = () => {
     }
     if (rlsChecked) {
       val += 2;
+    }
+    if (mmasChecked) {
+      val += 4;
     }
     return val;
   }
@@ -73,6 +76,9 @@ const BitPage = () => {
     }
     if (rlsChecked) {
       labels.push("RLS");
+    }
+    if (mmasChecked) {
+      labels.push("MMAS");
     }
     return labels;
   }
@@ -96,7 +102,7 @@ const BitPage = () => {
       return;
     }
 
-    const url = `https://localhost:7143/Bit/BitstringRun?maxProblemSize=${bitAmount}&algorithmI=${algorithms}&problemI=${problem}`;
+    const url = `https://localhost:7143/Bit/BitstringRun?problemSize=${bitAmount}&algorithmI=${algorithms}&problemI=${problem}`;
     // Fetch data from the server
     try {
       const response = await fetch(url, {
@@ -113,9 +119,10 @@ const BitPage = () => {
 
       const data = await response.json();
       // Handle the response data as needed
-      console.log(data);
+      //console.log(data);
       setGraphs(bitsToGraphs(data));
       setBitEntries(data);
+      setDataLoaded(true);
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);
     }
@@ -125,10 +132,16 @@ const BitPage = () => {
     <div>
       <h1>Bit Strings</h1>
       <div id="content"> 
+        <label htmlFor="experimentType">Experiment Type:</label>
+        <select id="experimentType">
+          <option value="0">Step by step</option>
+          <option value="1">Detailed run comparison</option>
+          <option value="2">Performance comparison</option>
+        </select>
         <div id="parameters">
           <h2>Parameters</h2>
           <label htmlFor="bitAmount">Bit Amount:</label>
-          <input type="number" id="bitAmount" />
+          <input type="number" id="bitAmount" defaultValue={8} />
           <label htmlFor="problem">Problem:</label>
           <select id="problem">
             <option value="0">OneMax</option>
@@ -154,16 +167,65 @@ const BitPage = () => {
               />
               RLS
             </label>
+            <label>
+              <input
+                type="checkbox"
+                id="mmas"
+                checked={mmasChecked}
+                onChange={() => setMmasChecked(!mmasChecked)}
+              />
+              MMAS
+            </label>
           </div>
           <button id="run" onClick={handleRunClick}>Run</button>
         </div>
-        <BitDiagram bitEntries={bitEntries} />
-        <Graph 
-          graphs={graphs} 
-          xName={"Iterations"} 
-          yName={ "Amount of Ones"} 
-          labels={getLabels()} 
-          noPoints/>
+        {dataLoaded && (
+          <div className="visualization-container">
+            <div className="bit-diagram-container">
+              <BitDiagram bitEntries={bitEntries} />
+            </div>
+            <div className="graph-container">
+              <Graph 
+                graphs={graphs} 
+                xName={"Iterations"} 
+                yName={"Amount of Ones"} 
+                labels={getLabels()} 
+                noPoints/>
+            </div>
+            <div className="table-container">
+              <h3>Iteration Data</h3>
+              <table className="bit-table">
+                <thead>
+                  <tr>
+                    <th>Step</th>
+                    {getLabels().map((label, index) => (
+                      <th key={index}>{label}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(() => {
+                    // Find the maximum number of iterations across all algorithms
+                    const maxIterations = Math.max(...bitEntries.map(algorithm => algorithm.length));
+                    
+                    // Create an array of indices from 0 to maxIterations-1
+                    return Array.from({ length: maxIterations }, (_, iterationIndex) => (
+                      <tr key={iterationIndex}>
+                        <td>{iterationIndex}</td>
+                        {bitEntries.map((algorithmData, algorithmIndex) => (
+                          <td key={algorithmIndex}>
+                            {algorithmData[iterationIndex] ? 
+                              algorithmData[iterationIndex].join('') : ''}
+                          </td>
+                        ))}
+                      </tr>
+                    ));
+                  })()}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

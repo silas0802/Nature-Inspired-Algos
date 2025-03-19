@@ -1,6 +1,12 @@
 #content {
     display: flex;
-    width: 100vw; /* Take up the full viewport width */
+    flex-direction: column;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+#experimentType {
+    max-width: 200px;
 }
 
 #parameters {
@@ -15,6 +21,72 @@
 #algorithms {
     display: flex;
     flex-direction: column;
+}
+
+.table-container {
+    margin-top: 20px;
+    max-width: 800px;
+    max-height: 400px; /* Set a max height for the container */
+    overflow-y: auto; /* Add vertical scrolling */
+    overflow-x: auto; /* Keep horizontal scrolling */
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .bit-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0;
+  }
+  
+  .bit-table th, .bit-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    white-space: nowrap; /* Prevents text wrapping */
+  }
+  
+  .bit-table th {
+    background-color: #333;
+    color: white;
+    position: sticky;
+    top: 0; /* Keeps the header visible when scrolling vertically */
+    z-index: 1; /* Ensures headers appear above table content */
+  }
+  
+  
+  
+  .bit-table tr:hover {
+    background-color: #ddd;
+  }
+  
+.visualization-container {
+    display: flex;
+    flex-direction: column; /* Explicitly set to row layout */
+    flex-wrap: nowrap; /* Prevent wrapping to ensure side-by-side layout */
+    gap: 20px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.bit-diagram-container {
+    flex: 2;
+    min-width: 200px; /* Reduced from 300px to allow more space on smaller screens */
+}
+.graph-container {
+    flex: 3;
+    min-width: 200px; /* Reduced from 300px to allow more space on smaller screens */
+}
+
+/* Ensure components don't get too small on mobile */
+@media (max-width: 768px) {
+    .visualization-container {
+        flex-direction: column;
+    }
+    
+    .bit-diagram-container, .graph-container {
+        width: 100%;
+    }
 }
 
 
