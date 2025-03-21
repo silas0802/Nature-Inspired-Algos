@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Graph from './Graph';
+import Table from './Table';
 import '../style/BitPage.css';
 import BitDiagram from './BitDiagram';
 
@@ -10,6 +11,9 @@ const BitPage = () => {
   const [graphs, setGraphs] = useState([]);
   const [bitEntries, setBitEntries] = useState([]);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [labels, setLabels] = useState([]);
+  const [stepCount, setStepCount] = useState(0);
+  const [expType, setExpType] = useState(0);
 
   function CountSetBits(bitArray) {
     let count = 0;
@@ -82,15 +86,40 @@ const BitPage = () => {
     }
     return labels;
   }
+  function resetExperiment(event){
+    const newExpType = parseInt(event.target.value); // Get the new value directly
+    setExpType(newExpType);
+    setStepCount(0);
+    setDataLoaded(false);
+    setBitEntries([]);
+    setGraphs([]);
+    setLabels([]);
+  }
 
   const handleRunClick = async () => {
+    const experimentType = document.getElementById('experimentType').value;
     const bitAmount = document.getElementById('bitAmount').value;
     const problem = document.getElementById('problem').value;
     const algorithms = getAlgorithmBits();
+    setLabels(getLabels());
 
-    // Validate input
-    if (!bitAmount || bitAmount <= 0 || bitAmount > 64) {
-      alert('Bit amount must be between 1 and 64');
+    try {
+      const data = await fetchBitStringRun(bitAmount, algorithms, problem );
+      // Handle the response data as needed
+      console.log(data);
+      setGraphs(bitsToGraphs(data));
+      setBitEntries(data);
+      setDataLoaded(true);
+      
+    } catch (error) {
+      console.error('There was a problem with the fetch operation:', error);
+      
+    }
+  };
+
+  async function fetchBitStringRun(bitAmount, algorithms, problem) {
+    if (!bitAmount || bitAmount <= 0 || bitAmount > 1000) {
+      alert('Bit amount must be between 1 and 1000');
       return;
     }
     if (!problem){
@@ -104,128 +133,118 @@ const BitPage = () => {
 
     const url = `https://localhost:7143/Bit/BitstringRun?problemSize=${bitAmount}&algorithmI=${algorithms}&problemI=${problem}`;
     // Fetch data from the server
-    try {
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        mode: 'cors', // Ensure CORS is enabled
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const data = await response.json();
-      // Handle the response data as needed
-      //console.log(data);
-      setGraphs(bitsToGraphs(data));
-      setBitEntries(data);
-      setDataLoaded(true);
-    } catch (error) {
-      console.error('There was a problem with the fetch operation:', error);
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors', // Ensure CORS is enabled
+    });
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
     }
-  };
+    const data = await response.json();
+    return data;
+  }
+
+  async function fetchBitStringExp(bitAmount, expCount, expSteps, algorithms, problem) {
+    if (!bitAmount || bitAmount <= 0 || bitAmount > 1000) {
+      alert('Bit amount must be between 1 and 1000');
+      return;
+    }
+    if (!problem){
+      alert('Problem must be selected');
+      return;
+    }
+    if (algorithms === 0){
+      alert('At least one algorithm must be selected');
+      return;
+    }
+
+    const url = `https://localhost:7143/Bit/BitstringExp?maxProblemSize=${bitAmount}&expCount=${expCount}&expSteps=${expSteps}&algorithmI=${algorithms}&problemI=${problem}`;
+    // Fetch data from the server
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors', // Ensure CORS is enabled
+    });
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    return data;
+  } 
+
 
   return (
     <div>
       <h1>Bit Strings</h1>
       <div id="content"> 
-        <label htmlFor="experimentType">Experiment Type:</label>
-        <select id="experimentType">
-          <option value="0">Step by step</option>
-          <option value="1">Detailed run comparison</option>
-          <option value="2">Performance comparison</option>
-        </select>
-        <div id="parameters">
-          <h2>Parameters</h2>
-          <label htmlFor="bitAmount">Bit Amount:</label>
-          <input type="number" id="bitAmount" defaultValue={8} />
-          <label htmlFor="problem">Problem:</label>
-          <select id="problem">
-            <option value="0">OneMax</option>
-            <option value="1">Leading Ones</option>
-          </select>
-          <div id="algorithms">
-            <p>Algorithms:</p>
-            <label>
-              <input
-                type="checkbox"
-                id="ea"
-                checked={eaChecked}
-                onChange={() => setEaChecked(!eaChecked)}
-              />
-              (1+1) EA
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                id="rls"
-                checked={rlsChecked}
-                onChange={() => setRlsChecked(!rlsChecked)}
-              />
-              RLS
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                id="mmas"
-                checked={mmasChecked}
-                onChange={() => setMmasChecked(!mmasChecked)}
-              />
-              MMAS
-            </label>
+        <div id="topGrid">
+          <div id="parameters">
+            <h2>Parameters</h2>
+            <label htmlFor="experimentType">Experiment Type:</label>
+            <select id="experimentType" onChange={resetExperiment}>
+              <option value="0">Step by step</option>
+              <option value="1">Detailed run comparison</option>
+              <option value="2">Performance comparison</option>
+            </select>
+            <label htmlFor="bitAmount">Bit Amount:</label>
+            <input type="number" id="bitAmount" defaultValue={8} />
+            {parseInt(expType) === 2 && <label htmlFor="expCount">Exp Count:</label>}
+            {parseInt(expType) === 2 && <input type="number" id="expCount" defaultValue={5} />}
+            {parseInt(expType) === 2 && <label htmlFor="expSteps">Exp Steps:</label>}
+            {parseInt(expType) === 2 && <input type="number" id="expSteps" defaultValue={10} />}
+            <label htmlFor="problem">Problem:</label>
+            <select id="problem">
+              <option value="0">OneMax</option>
+              <option value="1">Leading Ones</option>
+            </select>
+            <div id="algorithms">
+              <label>Algorithms:</label>
+              <label>
+                <input
+                  type="checkbox"
+                  id="ea"
+                  checked={eaChecked}
+                  onChange={() => setEaChecked(!eaChecked)}
+                />
+                (1+1) EA
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  id="rls"
+                  checked={rlsChecked}
+                  onChange={() => setRlsChecked(!rlsChecked)}
+                />
+                RLS
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  id="mmas"
+                  checked={mmasChecked}
+                  onChange={() => setMmasChecked(!mmasChecked)}
+                />
+                MMAS
+              </label>
+            </div>
+            <button id="run" onClick={handleRunClick}>Run</button>
           </div>
-          <button id="run" onClick={handleRunClick}>Run</button>
+          {dataLoaded && <BitDiagram bitEntries={bitEntries} />}
+          {dataLoaded && <Graph 
+            graphs={graphs} 
+            xName={"Iterations"} 
+            yName={"Amount of Ones"} 
+            labels={labels} 
+            noPoints
+            />}
         </div>
-        {dataLoaded && (
-          <div className="visualization-container">
-            <div className="bit-diagram-container">
-              <BitDiagram bitEntries={bitEntries} />
-            </div>
-            <div className="graph-container">
-              <Graph 
-                graphs={graphs} 
-                xName={"Iterations"} 
-                yName={"Amount of Ones"} 
-                labels={getLabels()} 
-                noPoints/>
-            </div>
-            <div className="table-container">
-              <h3>Iteration Data</h3>
-              <table className="bit-table">
-                <thead>
-                  <tr>
-                    <th>Step</th>
-                    {getLabels().map((label, index) => (
-                      <th key={index}>{label}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(() => {
-                    // Find the maximum number of iterations across all algorithms
-                    const maxIterations = Math.max(...bitEntries.map(algorithm => algorithm.length));
-                    
-                    // Create an array of indices from 0 to maxIterations-1
-                    return Array.from({ length: maxIterations }, (_, iterationIndex) => (
-                      <tr key={iterationIndex}>
-                        <td>{iterationIndex}</td>
-                        {bitEntries.map((algorithmData, algorithmIndex) => (
-                          <td key={algorithmIndex}>
-                            {algorithmData[iterationIndex] ? 
-                              algorithmData[iterationIndex].join('') : ''}
-                          </td>
-                        ))}
-                      </tr>
-                    ));
-                  })()}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+        <h3>Iteration Data</h3>
+        {dataLoaded && <Table bitEntries={bitEntries} labels={labels} />}   
       </div>
     </div>
   );

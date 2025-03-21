@@ -11,7 +11,10 @@ const Graph = ({ graphs, xName, yName, labels, noPoints, sorted}) => {
     const updateDimensions = () => {
       if (containerRef.current) {
         const { width, height } = containerRef.current.getBoundingClientRect();
-        setDimensions({ width, height });
+        setDimensions({ 
+          width: Math.floor(width), // Ensure width is an integer
+          height: Math.floor(height) // Ensure height is an integer
+        });
       }
     };
 
@@ -127,7 +130,7 @@ const Graph = ({ graphs, xName, yName, labels, noPoints, sorted}) => {
     // Add axis labels
     svg.append('text')
       .attr('x', dimensions.width / 2)
-      .attr('y', dimensions.height - 10)
+      .attr('y', dimensions.height - 20)
       .attr('text-anchor', 'middle')
       .attr('font-size', '12px')
       .attr('fill', 'white')
@@ -145,8 +148,10 @@ const Graph = ({ graphs, xName, yName, labels, noPoints, sorted}) => {
   }, [dimensions, graphs, noPoints, sorted, xName, yName, labels]);
 
   return (
-    <div ref={containerRef} style={{ width: '100%', height: '500px' }} className="Graph-container">
-      <svg ref={svgRef} className="Graph" style={{ width: '100%', height: '100%' }}></svg>
+    <div ref={containerRef} className="Graph"  style={{ width: '100%'}}>
+      <svg 
+        ref={svgRef} 
+      ></svg>
     </div>
   );
 };
