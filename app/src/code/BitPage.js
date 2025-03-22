@@ -9,6 +9,7 @@ const BitPage = () => {
   const [rlsChecked, setRlsChecked] = useState(false);
   const [mmasChecked, setMmasChecked] = useState(false);
   const [graphs, setGraphs] = useState([]);
+  const [tableData, setTableData] = useState([]);
   const [bitEntries, setBitEntries] = useState([]);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [labels, setLabels] = useState([]);
@@ -58,6 +59,56 @@ const BitPage = () => {
     }
     return graphs;
   }
+  function performancesToGraphs(perflist){
+    let graphs = [];
+    for (let i = 0; i < perflist.length; i++) { //For each algorithm
+      const algorithmResults = perflist[i];
+      let graph = [];
+      for (let j = 0; j < algorithmResults.length; j++) {
+        const result = algorithmResults[j]; // The average result at that problem size
+        const problemSize = document.getElementById('bitAmount').value/(algorithmResults.length-1) * j;
+        graph.push({x: problemSize, y: result});
+      }
+      graphs.push(graph);
+    }
+    return graphs;
+  }
+
+  function bitsToTable(bitlist){
+    var tableData = [];
+    const maxIterations = Math.max(...bitlist.map((algorithm) => algorithm.length));
+    for (let i = 0; i < maxIterations; i++) { //For each iteration
+      let row = [];
+      row.push(i);
+      for (let j = 0; j < bitlist.length; j++) { //For each algorithm
+        if (i < bitlist[j].length){
+          row.push(bitlist[j][i].join(""));
+        }
+        else{
+          row.push("");
+        }
+      }
+
+      tableData.push(row);
+    }
+    return tableData;
+  }
+
+  function performancesToTable(perflist){
+    var tableData = [];
+    const steps = perflist[0].length;
+    for (let i = 0; i < steps; i++) { //For each step
+      let row = [];
+      const problemSize = Math.floor(document.getElementById('bitAmount').value/(steps-1) * (i));
+      row.push(problemSize);
+      for (let j = 0; j < perflist.length; j++) { //For each algorithm
+        row.push(perflist[j][i]); // in the row add the performance at that step for each algorithm
+      }
+      tableData.push(row);
+    }
+    console.log(tableData);
+    return tableData;
+  }
   
   function getAlgorithmBits() {
     let val = 0;
@@ -96,24 +147,66 @@ const BitPage = () => {
     setLabels([]);
   }
 
-  const handleRunClick = async () => {
-    const experimentType = document.getElementById('experimentType').value;
-    const bitAmount = document.getElementById('bitAmount').value;
-    const problem = document.getElementById('problem').value;
-    const algorithms = getAlgorithmBits();
-    setLabels(getLabels());
-
+  async function handleStepByStep(bitAmount, algorithms, problem){
+    if (stepCount === 0){
+      handleDetailedRunComparison(bitAmount, algorithms, problem);
+    }
+    setStepCount(stepCount + 1);
+  }
+  async function handleDetailedRunComparison(bitAmount, algorithms, problem){
     try {
+      setLabels(getLabels());
       const data = await fetchBitStringRun(bitAmount, algorithms, problem );
       // Handle the response data as needed
       console.log(data);
       setGraphs(bitsToGraphs(data));
+      setTableData(bitsToTable(data));
       setBitEntries(data);
       setDataLoaded(true);
       
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);
       
+    }
+  }
+  async function handlePerformanceComparison(bitAmount, expCount, expSteps, algorithms, problem){
+    try {
+      setLabels(getLabels());
+      const data = await fetchBitStringExp(bitAmount, expCount, expSteps, algorithms, problem);
+      // Handle the response data as needed
+      console.log(data);
+      setGraphs(performancesToGraphs(data));
+      setTableData(performancesToTable(data));
+      setBitEntries(data);
+      setDataLoaded(true);
+      
+    } catch (error) {
+      console.error('There was a problem with the fetch operation:', error);
+      
+    }
+  }
+
+  const handleRunClick = async () => {
+    const experimentType = document.getElementById('experimentType').value;
+    const bitAmount = document.getElementById('bitAmount').value;
+    const problem = document.getElementById('problem').value;
+    const algorithms = getAlgorithmBits();
+    
+    switch (parseInt(experimentType)) {
+      case 0: //step by step
+        await handleStepByStep(bitAmount, algorithms, problem);
+        break;
+      case 1: //detailed run comparison
+        await handleDetailedRunComparison(bitAmount, algorithms, problem);
+        break;
+      case 2: //performance comparison
+        const expCount = document.getElementById('expCount').value;
+        const expSteps = document.getElementById('expSteps').value;
+        await handlePerformanceComparison(bitAmount, expCount, expSteps, algorithms, problem);
+        break;
+    
+      default:
+        break;
     }
   };
 
@@ -191,7 +284,7 @@ const BitPage = () => {
               <option value="1">Detailed run comparison</option>
               <option value="2">Performance comparison</option>
             </select>
-            <label htmlFor="bitAmount">Bit Amount:</label>
+            <label htmlFor="bitAmount">Problem Size:</label>
             <input type="number" id="bitAmount" defaultValue={8} />
             {parseInt(expType) === 2 && <label htmlFor="expCount">Exp Count:</label>}
             {parseInt(expType) === 2 && <input type="number" id="expCount" defaultValue={5} />}
@@ -233,18 +326,20 @@ const BitPage = () => {
               </label>
             </div>
             <button id="run" onClick={handleRunClick}>Run</button>
+            {stepCount > 0 && <button id="newRun" onClick={resetExperiment}>New Run</button>}
           </div>
-          {dataLoaded && <BitDiagram bitEntries={bitEntries} />}
+          {dataLoaded && expType!==2 && <BitDiagram bitEntries={bitEntries} stepCount={stepCount} />}
           {dataLoaded && <Graph 
+            stepCount={stepCount}
             graphs={graphs} 
-            xName={"Iterations"} 
-            yName={"Amount of Ones"} 
+            xName={expType!==2 ? "Iterations" : "Problem Size"} 
+            yName={expType!==2 ? "Amount of Ones" : "Average Iterations"} 
             labels={labels} 
             noPoints
             />}
         </div>
-        <h3>Iteration Data</h3>
-        {dataLoaded && <Table bitEntries={bitEntries} labels={labels} />}   
+        {dataLoaded && <h3>Experiment Data</h3>}
+        {dataLoaded && <Table rows={tableData} labels={labels} stepCount={stepCount} />}   
       </div>
     </div>
   );

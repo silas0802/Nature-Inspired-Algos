@@ -178,11 +178,12 @@ namespace API.Classes.BitStrings
         /// <returns>A list of average number of iterations to solve the problem at each problemsize.</returns>
         public float[] RunMultiSimulation(int[] startValue, BitAlgorithm algorithm, BitProblem problem)
         {
-            float[] results = new float[expSteps];
+            float[] results = new float[expSteps+1];
+            results[0] = 0;
             bool fail = false;
-            for (int k = 0; k < expSteps; k++)
+            for (int k = 1; k < expSteps+1; k++)
             {
-                int[] stepStartVal = Utility.CloneBitArrayPart(startValue, problemSize*(k+1)/expSteps);
+                int[] stepStartVal = Utility.CloneBitArrayPart(startValue, problemSize*(k)/expSteps);
                 int[] stepResults = new int[expCount];
                 algorithm.InitializeAlgorithm(stepStartVal.Length);
                 for (int i = 0; i < expCount; i++)

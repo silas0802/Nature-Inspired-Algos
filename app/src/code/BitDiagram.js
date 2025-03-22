@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
 
-const BitDiagram = ({ bitEntries }) => {
+const BitDiagram = ({ bitEntries, stepCount }) => {
   const svgRef = useRef();
   const containerRef = useRef();
   const [dimensions, setDimensions] = useState({ width: 300, height: 500 });
@@ -66,8 +66,9 @@ const BitDiagram = ({ bitEntries }) => {
     const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'cyan', 'magenta'];
     const points = [];
     for (let i = 0; i < bitEntries.length; i++) { // For each algorithm
-      for (let j = 0; j < bitEntries[i].length; j++) { // For each iteration
-        const bits = bitEntries[i][j];
+      const iterations = stepCount > 0 ? bitEntries[i].slice(0, stepCount) : bitEntries[i]; // Limit iterations if stepCount > 0
+      for (let j = 0; j < iterations.length; j++) { // For each iteration
+        const bits = iterations[j];
         const length = bits.length;
         const oneCount = bits.reduce((acc, bit) => acc + bit, 0);
         const vPerc = oneCount / bits.length;
@@ -116,7 +117,7 @@ const BitDiagram = ({ bitEntries }) => {
       .attr('r', 5) // Set point radius
       .attr('fill', d => colors[d.algorithmIndex % colors.length]); // Apply color based on algorithm
 
-  }, [bitEntries, dimensions]);
+  }, [bitEntries, stepCount, dimensions]);
 
   return (
     <div ref={containerRef} className="BitDiagram" style={{ width: '100%' }}>

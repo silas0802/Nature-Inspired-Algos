@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Table = ({ bitEntries, labels }) => {
+const Table = ({ rows, labels, stepCount }) => {
   return (
     <table className="bit-table">
       <thead>
@@ -11,31 +11,15 @@ const Table = ({ bitEntries, labels }) => {
           ))}
         </tr>
       </thead>
-        <tbody>
-          {(() => {
-            // Find the maximum number of iterations across all algorithms
-            const maxIterations = Math.max(
-              ...bitEntries.map((algorithm) => algorithm.length)
-            );
-
-            // Create an array of indices from 0 to maxIterations-1
-            return Array.from(
-              { length: maxIterations },
-              (_, iterationIndex) => (
-                <tr key={iterationIndex}>
-                  <td>{iterationIndex}</td>
-                  {bitEntries.map(
-                    (algorithmData, algorithmIndex) => (
-                      <td key={algorithmIndex}>
-                        {algorithmData[iterationIndex] ? algorithmData[iterationIndex].join("") : ""}
-                      </td>
-                    )
-                  )}
-                </tr>
-              )
-            );
-          })()}
-        </tbody>
+      <tbody>
+        {rows.slice(0, stepCount || rows.length).map((row, rowIndex) => (
+          <tr key={rowIndex}>
+            {row.map((cell, cellIndex) => (
+              <td key={cellIndex}>{cell}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
     </table>
   );
 };

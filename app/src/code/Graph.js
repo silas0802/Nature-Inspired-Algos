@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
 
-const Graph = ({ graphs, xName, yName, labels, noPoints, sorted}) => {
+const Graph = ({ stepCount, graphs, xName, yName, labels, noPoints, sorted}) => {
   const svgRef = useRef();
   const containerRef = useRef();
   const [dimensions, setDimensions] = useState({ width: 500, height: 500 });
@@ -66,7 +66,13 @@ const Graph = ({ graphs, xName, yName, labels, noPoints, sorted}) => {
     const yScale = d3.scaleLinear().domain([0, maxY]).range([height, 0]);
 
     for (let j = 0; j < graphs.length; j++) {
-      const points = graphs[j];
+      let points = graphs[j];
+      
+      // Limit points based on stepCount
+      if (stepCount > 0) {
+        points = points.slice(0, stepCount);
+      }
+
       if (sorted) {
         points.sort((a, b) => a.x - b.x);
       }
@@ -110,8 +116,9 @@ const Graph = ({ graphs, xName, yName, labels, noPoints, sorted}) => {
     
     // Add points
     if (!noPoints) {
+      const limitedPoints = stepCount > 0 ? allPoints.slice(0, stepCount * graphs.length) : allPoints;
       g.selectAll('circle')
-        .data(allPoints)
+        .data(limitedPoints)
         .enter()
         .append('circle')
         .attr('class', 'point')
@@ -145,7 +152,7 @@ const Graph = ({ graphs, xName, yName, labels, noPoints, sorted}) => {
       .attr('transform', 'rotate(-90)')
       .text(yName);
       
-  }, [dimensions, graphs, noPoints, sorted, xName, yName, labels]);
+  }, [dimensions, graphs, noPoints, sorted, xName, yName, labels, stepCount]);
 
   return (
     <div ref={containerRef} className="Graph"  style={{ width: '100%'}}>
