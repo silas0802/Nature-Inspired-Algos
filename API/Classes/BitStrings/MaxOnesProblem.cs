@@ -3,8 +3,8 @@ using System;
 
 public class MaxOnesProblem : BitProblem
 {
-    public override bool FitnessCompare(int[] current, int[] mutated)
+    public override int EvaluateFitness(int[] bitstring)
     {
-        return Utility.CountSetBits(mutated) > Utility.CountSetBits(current);
+        return Utility.CountSetBits(bitstring);
     }
 }

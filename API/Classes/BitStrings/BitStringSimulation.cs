@@ -132,6 +132,7 @@ namespace API.Classes.BitStrings
 
             }
             Debug.WriteLine($"Experiment finished with start value: {{{string.Join(',',startValue)}}}");
+            Debug.WriteLine($"Result:\n{Utility.DisplayAnyList(result)}");
             return result;
 
         }

@@ -53,6 +53,36 @@ namespace API.Classes
             return result;
         }
 
+        public static string DisplayAnyList<T>(T[] list)
+        {
+            return DisplayAnyListRecursive(list, 0);
+        }
+
+        private static string DisplayAnyListRecursive<T>(T[] list, int depth)
+        {
+            string indent = new string(' ', depth * 2);
+            string result = "";
+            foreach (var item in list)
+            {
+                if (item is Array subArray)
+                {
+                    if (subArray is T[] subArrayT)
+                    {
+                        result += $"{indent}[\n{DisplayAnyListRecursive(subArrayT, depth + 1)}\n{indent}]\n";
+                    }
+                    else
+                    {
+                        result += $"{indent}[{DisplayAnyListRecursive(subArray.Cast<object>().ToArray(), depth + 1)}]\n";
+                    }
+                }
+                else
+                {
+                    result += $"{item} ";
+                }
+            }
+            return result;
+        }
+
         /// <summary>
         /// !!!Deprecated!!! Generates a random result based on the specified parameters. Used for testing.
         /// </summary>

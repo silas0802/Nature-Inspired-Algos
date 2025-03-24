@@ -8,5 +8,10 @@ public abstract class BitProblem
 	/// <param name="current"></param>
 	/// <param name="mutated"></param>
 	/// <returns>True if mutated is better than current</returns>
-	public abstract bool FitnessCompare(int[] current, int[] mutated);
+	public bool FitnessCompare(int[] current, int[] mutated)
+	{
+        return EvaluateFitness(mutated) > EvaluateFitness(current);
+    }
+
+	public abstract int EvaluateFitness(int[] bitstring);
 }

@@ -6,12 +6,10 @@
         private BitProblem selectedProblem;
         public double[,] pheromone = new double[0,0];
         private int problemSize = 0; // Length of the binary string
-        public int numAnts = 20; // Number of ants
-        public double alpha = 1.0; // Pheromone importance
-        public double beta = 2.0; // Heuristic importance
-        public double rho = 0.1; // Pheromone evaporation rate
-        public double minPheromone = 0.1;
-        public double maxPheromone = 10.0;
+        public int numAnts = 1; // Number of ants
+        public double rho = 1f; // Pheromone evaporation rate
+        public double minPheromone = 0; // Lowest pheromone level
+        public double maxPheromone = 0; // Highest pheromone level 
 
         public MMASAlgo(BitProblem selectedProblem)
         {
@@ -19,8 +17,8 @@
         }
         public override int[] Mutate(int[] original)
         {
-            int[] bestSolution = new int[problemSize];
-            int bestFitness = 0;
+            int[] bestSolution = original;
+            int bestFitness = selectedProblem.EvaluateFitness(original);
 
             int[][] solutions = new int[numAnts][];
             int[] fitnesses = new int[numAnts];
@@ -29,7 +27,7 @@
             for (int k = 0; k < numAnts; k++)
             {
                 solutions[k] = ConstructSolution();
-                fitnesses[k] = Utility.CountSetBits(solutions[k]);
+                fitnesses[k] = selectedProblem.EvaluateFitness((solutions[k]));
                 if (fitnesses[k] > bestFitness)
                 {
                     bestSolution = solutions[k];
@@ -48,8 +46,8 @@
             double[,] pheromone = new double[length, 2];
             for (int i = 0; i < length; i++)
             {
-                pheromone[i, 0] = maxPheromone; // Pheromone for bit 0
-                pheromone[i, 1] = maxPheromone; // Pheromone for bit 1
+                pheromone[i, 0] = 0.5f; // Pheromone for bit 0
+                pheromone[i, 1] = 0.5f; // Pheromone for bit 1
             }
             return pheromone;
         }
@@ -59,8 +57,8 @@
             int[] solution = new int[problemSize];
             for (int i = 0; i < problemSize; i++)
             {
-                double prob0 = Math.Pow(pheromone[i, 0], alpha) * Math.Pow(1.0, beta);
-                double prob1 = Math.Pow(pheromone[i, 1], alpha) * Math.Pow(1.0, beta);
+                double prob0 = pheromone[i, 0];
+                double prob1 = pheromone[i, 1];
                 double sumProb = prob0 + prob1;
 
                 double rand = random.NextDouble();
@@ -90,14 +88,14 @@
             // Deposit pheromone based on best solution
             for (int i = 0; i < problemSize; i++)
             {
-                if (bestSolution[i] == 1)
+                if (bestSolution[i] == 1) // If best solution has a 1 at i then boost 1-pheromone 
                 {
-                    pheromone[i, 1] += bestFitness;
+                    pheromone[i, 1] += rho;
                     pheromone[i, 1] = Math.Min(pheromone[i, 1], maxPheromone);
                 }
-                else
+                else // else boost 0-pheromone
                 {
-                    pheromone[i, 0] += bestFitness;
+                    pheromone[i, 0] += rho;
                     pheromone[i, 0] = Math.Min(pheromone[i, 0], maxPheromone);
                 }
             }
@@ -106,6 +104,8 @@
         public override void InitializeAlgorithm(int problemSize)
         {
             this.problemSize = problemSize;
+            this.minPheromone = 1 / (float)problemSize;
+            this.maxPheromone = 1 - this.minPheromone;
             pheromone = InitializePheromone(problemSize);
         }
     }

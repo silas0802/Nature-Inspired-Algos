@@ -1,10 +1,11 @@
-﻿using System;
+﻿using API.Classes;
+using System;
 
 public class LeadingOnesProblem : BitProblem
 {
-    public override bool FitnessCompare(int[] current, int[] mutated)
+    public override int EvaluateFitness(int[] bitstring)
     {
-        return CountLeadingOnes(mutated) > CountLeadingOnes(current);
+        return CountLeadingOnes(bitstring);
     }
 
     private int CountLeadingOnes(int[] bitArray)
