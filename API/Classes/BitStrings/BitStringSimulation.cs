@@ -186,9 +186,9 @@ namespace API.Classes.BitStrings
             {
                 int[] stepStartVal = Utility.CloneBitArrayPart(startValue, problemSize*(k)/expSteps);
                 int[] stepResults = new int[expCount];
-                algorithm.InitializeAlgorithm(stepStartVal.Length);
                 for (int i = 0; i < expCount; i++)
                 {
+                algorithm.InitializeAlgorithm(stepStartVal.Length);
                     if (fail)
                     {
                         stepResults[i] = MAX_ITERATIONS;
