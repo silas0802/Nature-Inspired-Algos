@@ -8,7 +8,7 @@ namespace API.Classes.TSP
     public class TSPSimulation : Simulation
     {
         public new const int MAX_PROBLEM_SIZE = 100;
-        public new const int MAX_ITERATIONS = 100;
+        public new const int MAX_ITERATIONS = 200;
         public void SetParametersForDetailed(int problemSize, int algorithmI)
         {
             this.problemSize = problemSize;
@@ -70,19 +70,13 @@ namespace API.Classes.TSP
         {
             List<int[]> result = new List<int[]>();
             result.Add(startValue);
-            algorithm.InitializeAlgorithm(startValue.Length);
+            algorithm.InitializeAlgorithm(nodes);
             for (int i = 0; i < MAX_ITERATIONS; i++)
             {
                 int[] bestRes = result[result.Count - 1];
                 int[] mutatedRes = algorithm.Mutate(bestRes);
-                if (Utility.TSPCompare(nodes, mutatedRes, bestRes))
-                {
-                    result.Add(mutatedRes);
-                }
-                else
-                {
-                    result.Add(bestRes);
-                }
+                result.Add(mutatedRes);
+                
                 //Debug.WriteLine($"Iteration {i}: {Utility.CountSetBits(result[result.Count - 1])}");
 
             }
@@ -106,7 +100,7 @@ namespace API.Classes.TSP
                 int[] stepResults = new int[expCount];
                 for (int i = 0; i < expCount; i++)
                 {
-                    algorithm.InitializeAlgorithm(stepStartVal.Length);
+                    algorithm.InitializeAlgorithm(nodes);
                     if (fail)
                     {
                         stepResults[i] = MAX_ITERATIONS;
@@ -158,7 +152,7 @@ namespace API.Classes.TSP
                 case 0:
                     return new TSPOneOneEAAlgo();
                 case 1:
-                    return new TSPSimAnealAlgo();
+                    return new TSPSimAnnealAlgo();
                 case 2:
                     return new TSPMMASAlgo();
                 default:

@@ -3,5 +3,5 @@ using System;
 
 public abstract class BitAlgorithm : Algorithm
 {
-
+    public abstract void InitializeAlgorithm(int problemSize);
 }
