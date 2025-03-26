@@ -32,31 +32,43 @@
     gap: 2px;
 }
 
+.table-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    display: block;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    border: 1px solid #ddd; /* Add visible border to scrollable container */
+}
 
 .bit-table {
-width: 100%;
-border-collapse: collapse;
-margin-bottom: 0;
+    width: max-content; /* Allow table to take its natural width */
+    min-width: 100%; /* Ensure it's at least as wide as its container */
+    border-collapse: collapse;
+    margin-bottom: 0;
+    table-layout: auto; /* Switch back to auto layout for better content fitting */
 }
 
 .bit-table th, .bit-table td {
-border: 1px solid #ddd;
-padding: 8px;
-text-align: left;
-white-space: nowrap; /* Prevents text wrapping */
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    white-space: nowrap; /* Prevents text wrapping */
+    overflow: hidden; /* Hide overflow content */
+    text-overflow: ellipsis; /* Show ellipsis for overflow text */
+    max-width: 300px; /* Limit cell width */
 }
 
 .bit-table th {
-background-color: #333;
-color: white;
-position: sticky;
-top: 0; /* Keeps the header visible when scrolling vertically */
-z-index: 1; /* Ensures headers appear above table content */
+    background-color: #333;
+    color: white;
+    position: sticky;
+    top: 0; /* Keeps the header visible when scrolling vertically */
+    z-index: 1; /* Ensures headers appear above table content */
 }
 
-
-
 .bit-table tr:hover {
-background-color: #ddd;
+    background-color: #ddd;
 }
 
