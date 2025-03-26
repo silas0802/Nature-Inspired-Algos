@@ -1,4 +1,4 @@
-﻿using API.Classes;
+﻿using API.Classes.Generic;
 using System;
 
 public class MaxOnesProblem : BitProblem

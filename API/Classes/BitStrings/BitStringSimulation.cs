@@ -1,45 +1,11 @@
+using API.Classes.Generic;
 using System.Diagnostics;
 
 namespace API.Classes.BitStrings
 {
-    public class BitStringSimulation
+    public class BitStringSimulation : Simulation
     {
-        public const int MAX_PROBLEM_SIZE = 1000;
-        public const int MAX_EXPERIMENT_COUNT = 1000;
-        public const int MAX_EXPERIMENT_STEPS = 30;
-        public const int ALGORITHM_COUNT = 3;
-        public const int PROBLEM_COUNT = 2;
-        public const int MAX_ITERATIONS = 50000;
-        private int _problemSize;
-        private int _algorithmI;
         private int _problemI;
-        private int _expCount;
-        private int _expSteps;
-
-        public int problemSize
-        {
-            get => _problemSize;
-            private set
-            {
-                if (value > MAX_PROBLEM_SIZE || value <= 0)
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
-                _problemSize = value;
-            }
-        }
-        public int algorithmI
-        {
-            get => _algorithmI;
-            private set
-            {
-                if (value > MathF.Pow(2, ALGORITHM_COUNT) - 1 || value <= 0)
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
-                _algorithmI = value;
-            }
-        }
         public int problemI
         {
             get => _problemI;
@@ -52,31 +18,6 @@ namespace API.Classes.BitStrings
                 _problemI = value;
             }
         }
-        public int expCount
-        {
-            get => _expCount;
-            private set
-            {
-                if (value > MAX_EXPERIMENT_COUNT || value <= 0)
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
-                _expCount = value;
-            }
-        }
-        public int expSteps
-        {
-            get => _expSteps;
-            private set
-            {
-                if (value > MAX_EXPERIMENT_STEPS || value <= 0)
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
-                _expSteps = value;
-            }
-        }
-
 
         /// <summary>
         /// Sets the parameters for the single/detailed simulation.
@@ -105,22 +46,21 @@ namespace API.Classes.BitStrings
             this.expSteps = expSteps;
         }
 
-
         /// <summary>
         /// Runs the experiment results for each algorithm.
         /// </summary>
         /// <typeparam name="T">The result type for each algorithm.</typeparam>
         /// <param name="simulation">Which type of simulation to run, e.g: RunDetailedSimulation</param>
         /// <returns>An experiment result for each algorithm selected</returns>
-        public T[] RunExperiment<T>(Func<int[],BitAlgorithm,BitProblem, T> simulation)
+        public T[] RunExperiment<T>(Func<int[], BitAlgorithm, BitProblem, T> simulation)
         {
-            
+
             int bitstring = algorithmI;
             T[] result = new T[Utility.CountSetBits((ulong)algorithmI)];
 
             int currentAlgo = 0;
             BitProblem selectedProblem = GetProblem(problemI);
-            
+
             int[] startValue = Utility.InitializeRandomBinaryString(problemSize);
             for (int i = 0; i < ALGORITHM_COUNT; i++)
             {
@@ -131,7 +71,7 @@ namespace API.Classes.BitStrings
                 }
 
             }
-            Debug.WriteLine($"Experiment finished with start value: {{{string.Join(',',startValue)}}}");
+            Debug.WriteLine($"Experiment finished with start value: {{{string.Join(',', startValue)}}}");
             Debug.WriteLine($"Result:\n{Utility.DisplayAnyList(result)}");
             return result;
 
@@ -240,11 +180,11 @@ namespace API.Classes.BitStrings
             switch (index)
             {
                 case 0:
-                    return new OneOneEAAlgo();
+                    return new BitOneOneEAAlgo();
                 case 1:
-                    return new RLSAlgo();
+                    return new BitRLSAlgo();
                 case 2:
-                    return new MMASAlgo(selectedProblem);
+                    return new BitMMASAlgo(selectedProblem);
                 default:
                     throw new IndexOutOfRangeException($"No algorithm with index: {index}");
             }

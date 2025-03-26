@@ -1,7 +1,7 @@
-﻿using System;
+﻿using API.Classes.Generic;
+using System;
 
-public abstract class BitAlgorithm
+public abstract class BitAlgorithm : Algorithm
 {
-    public abstract int[] Mutate(int[] original);
-    public abstract void InitializeAlgorithm(int problemSize);
+
 }
