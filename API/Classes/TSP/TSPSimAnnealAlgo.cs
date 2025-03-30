@@ -8,13 +8,13 @@ namespace API.Classes.TSP
         Random random = new Random();
         double temperature = 0f;
         int m = 0;
-        float c = 0.0001f;
+        float c = 0.00001f;
         float alpha = 0;
         public override void InitializeAlgorithm(Vector2[] nodes)
         {
             base.InitializeAlgorithm(nodes);
             m = nodes.Length*20;
-            temperature = m*m*m;
+            temperature = m*m;
             alpha = 1 - 1 / (c * m * m);
             
         }

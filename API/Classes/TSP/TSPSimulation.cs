@@ -92,20 +92,14 @@ namespace API.Classes.TSP
         public float[] RunMultiSimulation(int[] startValue, Vector2[] nodes, TSPAlgorithm algorithm)
         {
             float[] results = new float[expSteps + 1];
-            results[0] = 0;
-            bool fail = false;
+
             for (int k = 1; k < expSteps + 1; k++)
             {
-                int[] stepStartVal = Utility.CloneBitArrayPart(startValue, problemSize * (k) / expSteps);
-                int[] stepResults = new int[expCount];
+                int[] stepStartVal = Utility.RandomTSPSolution(nodes.Length);
+                float[] stepResults = new float[expCount];
                 for (int i = 0; i < expCount; i++)
                 {
                     algorithm.InitializeAlgorithm(nodes);
-                    if (fail)
-                    {
-                        stepResults[i] = MAX_ITERATIONS;
-                        continue;
-                    }
 
                     int[] bestRes = stepStartVal;
                     for (int j = 1; j < MAX_ITERATIONS; j++)
@@ -117,19 +111,10 @@ namespace API.Classes.TSP
                         }
 
 
-                        if (Utility.CountSetBits(bestRes) == bestRes.Length)
-                        {
-                            stepResults[i] = j;
-                            //Debug.WriteLine($"Run {i} finished after iteration: {j}");
-                            break;
-                        }
+                        
                         if (j == MAX_ITERATIONS - 1)
                         {
-                            Debug.WriteLine($"Failed to find a solution in time for problemsize {stepStartVal.Length}");
-
-                            stepResults[i] = MAX_ITERATIONS;
-                            fail = true;
-
+                            stepResults[i] = Utility.TSPCalculateDistance(nodes,bestRes);
                         }
                     }
                 }
@@ -142,7 +127,6 @@ namespace API.Classes.TSP
         /// 
         /// </summary>
         /// <param name="index"></param>
-        /// <param name="selectedProblem"></param>
         /// <returns>A new BitAlgorithm object of given index</returns>
         /// <exception cref="IndexOutOfRangeException"></exception>
         private TSPAlgorithm GetAlgorithm(int index)
