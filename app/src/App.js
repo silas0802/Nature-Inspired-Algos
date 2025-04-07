@@ -1,9 +1,9 @@
 // filepath: /c:/Users/silas/Documents/Hobby Projects/Mackrill/app/src/js/App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import '../style/App.css';
-import TSPPage from './TSPPage';
-import BitPage from './BitPage';
+import './style/App.css';
+import TSPPage from './pages/TSPPage';
+import BitPage from './pages/BitPage';
 
 function App() {
   

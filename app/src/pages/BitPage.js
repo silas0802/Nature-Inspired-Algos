@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import Graph from './Graph';
-import Table from './Table';
+import Graph from '../components/Graph';
+import Table from '../components/Table';
 import '../style/BitPage.css';
-import BitDiagram from './BitDiagram';
+import BitDiagram from '../components/BitDiagram';
 
 const BitPage = () => {
   const [eaChecked, setEaChecked] = useState(true);
