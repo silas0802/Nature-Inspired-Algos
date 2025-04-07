@@ -10,7 +10,7 @@ namespace API.Controllers
         TSPSimulation simulation = new TSPSimulation();
 
         [HttpGet("TSPRun")]
-        public ActionResult<int[][][]> TSPRun(int problemSize, int algorithmI)
+        public ActionResult<TSPRunResult> TSPRun(int problemSize, int algorithmI)
         {
             if (problemSize <= 0 || problemSize > TSPSimulation.MAX_PROBLEM_SIZE)
             {
@@ -22,16 +22,16 @@ namespace API.Controllers
             }
             
             simulation.SetParametersForDetailed(problemSize, algorithmI);
-            int[][][]? result = simulation.RunExperiment(simulation.RunDetailedSimulation);
+            (float[][], int[][][])? result = simulation.RunDetailedExperiment();
             if (result == null)
             {
                 return BadRequest("Simulation failed");
             }
-            return Ok(result);
+            return Ok(new TSPRunResult(result.Value.Item1,result.Value.Item2));
         }
 
         [HttpGet("TSPExp")]
-        public ActionResult<float[][]> TSPExp(int maxProblemSize, int expCount, int expSteps, int algorithmI)
+        public ActionResult<TSPExpResult> TSPExp(int maxProblemSize, int expCount, int expSteps, int algorithmI)
         {
             if (maxProblemSize <= 0 || maxProblemSize > TSPSimulation.MAX_PROBLEM_SIZE)
             {
@@ -51,13 +51,33 @@ namespace API.Controllers
             }
             
             simulation.SetParametersForMultiExperiment(maxProblemSize, expCount, expSteps, algorithmI);
-            float[][]? result = simulation.RunExperiment(simulation.RunMultiSimulation);
+            float[][]? result = simulation.RunComparisonExperiment();
 
             if (result == null)
             {
                 return BadRequest("Simulation failed");
             }
-            return Ok(result);
+            return Ok(new TSPExpResult(result));
+        }
+        public class TSPRunResult
+        {
+            public float[][] nodes { get; set; }
+            public int[][][] solutions { get; set; }
+
+            public TSPRunResult(float[][] nodes, int[][][] solutions)
+            {
+                this.nodes = nodes;
+                this.solutions = solutions;
+            }
+        }
+
+        public class TSPExpResult
+        {
+            public float[][] results { get; set; }
+            public TSPExpResult(float[][] results)
+            {
+                this.results = results;
+            }
         }
     }
 }

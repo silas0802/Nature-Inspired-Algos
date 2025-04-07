@@ -84,7 +84,17 @@ namespace API.Classes.Generic
             }
             return result;
         }
-
+        public static float[][] ConvertVectorsToFloatArray(Vector2[] vector)
+        {
+            float[][] result = new float[vector.Length][];
+            for (int i = 0; i < vector.Length; i++)
+            {
+                result[i] = new float[2];
+                result[i][0] = vector[i].X;
+                result[i][1] = vector[i].Y;
+            }
+            return result;
+        }
         public static int[] RandomTSPSolution(int problemSize)
         {
             List<int> options = new List<int>();
