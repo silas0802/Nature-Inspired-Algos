@@ -6,7 +6,7 @@ const CoordinateSystem = ({ points, labels }) => {
   const svgRef = useRef();
   const containerRef = useRef();
   const [dimensions, setDimensions] = useState({ width: 500, height: 500 });
-
+  
   // Update dimensions when container size changes
   useEffect(() => {
     const updateDimensions = () => {
@@ -39,6 +39,8 @@ const CoordinateSystem = ({ points, labels }) => {
   }, []);
 
   useEffect(() => {
+    const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'cyan', 'magenta'];
+
     if (dimensions.width === 0) return;
 
     const svg = d3.select(svgRef.current)
@@ -49,10 +51,16 @@ const CoordinateSystem = ({ points, labels }) => {
     svg.selectAll('*').remove();
 
     // Calculate lines
-    const lines = [{ x1: points[0].x, y1: points[0].y, x2: points[points.length - 1].x, y2: points[points.length - 1].y }];
-    for (let i = 0; i < points.length - 1; i++) {
-      lines.push({ x1: points[i].x, y1: points[i].y, x2: points[i + 1].x, y2: points[i + 1].y });
+    const lines = [];
+    for (let algoI = 0; algoI < points.length; algoI++) {
+      const nodes = points[algoI];
+      lines.push({ x1: nodes[0].x, y1: nodes[0].y, x2: nodes[nodes.length - 1].x, y2: nodes[nodes.length - 1].y, algoI: algoI });
+      for (let i = 0; i < nodes.length - 1; i++) {
+        lines.push({ x1: nodes[i].x, y1: nodes[i].y, x2: nodes[i + 1].x, y2: nodes[i + 1].y , algoI: algoI});
+      }
+      
     }
+    
 
     // Add lines
     svg.selectAll('line')
@@ -64,16 +72,16 @@ const CoordinateSystem = ({ points, labels }) => {
       .attr('y1', d => d.y1)
       .attr('x2', d => d.x2)
       .attr('y2', d => d.y2)
-      .attr('stroke', d3.rgb(118, 165, 171));
+      .attr('stroke', d => colors[d.algoI % colors.length]);
 
     // Add points
-    svg.selectAll('circle')
-      .data(points)
-      .enter()
-      .append('circle')
-      .attr('class', 'point') // Add class
-      .attr('cx', d => d.x)
-      .attr('cy', d => d.y);
+    // svg.selectAll('circle')
+    //   .data(points)
+    //   .enter()
+    //   .append('circle')
+    //   .attr('class', 'point') // Add class
+    //   .attr('cx', d => d.x)
+    //   .attr('cy', d => d.y);
 
   }, [points, dimensions]);
 

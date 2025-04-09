@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import CoordinateSystem from '../components/CoordinateSystem';
 import '../style/TSPPage.css';
+import Table from '../components/Table';
 const TSPPage = () => {
 
   const [eaChecked, setEaChecked] = useState(true);
@@ -10,9 +11,11 @@ const TSPPage = () => {
   const [stepCount, setStepCount] = useState(0);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [labels, setLabels] = useState([]);
+  const [nodes, setNodes] = useState([]);
+  const [solutions, setSolutions] = useState([]);
+  const [results, setResults] = useState([]);
+  const [diagramPoints, setDiagramPoints] = useState([]);
   const [tableData, setTableData] = useState([]);
-  const [graphs, setGraphs] = useState([]);
-  
   
   function getLabels(){
     let labels = [];
@@ -41,6 +44,36 @@ const TSPPage = () => {
     }
     return val;
   }
+  function getDiagramPoints(nodes, solutions){
+    let allPoints = [];
+    const margin = 50; // Margin around the coordinate system
+    for (let j = 0; j < solutions.length; j++) {
+      const solution = solutions[j];
+      let points = [];
+      for (let i = 0; i < solution.length; i++) {
+        const nodeIndex = solution[i];
+        points.push({x: nodes[nodeIndex][0]+margin, y: nodes[nodeIndex][1]});
+      }
+      allPoints.push(points);
+    }
+    
+    return allPoints;
+  }
+
+  function performancesToTable(perflist){
+    var tableData = [];
+    const steps = perflist[0].length;
+    for (let i = 0; i < steps; i++) { //For each step
+      let row = [];
+      const problemSize = Math.floor(document.getElementById('problemSize').value/(steps-1) * (i));
+      row.push(problemSize);
+      for (let j = 0; j < perflist.length; j++) { //For each algorithm
+        row.push(perflist[j][i]); // in the row add the performance at that step for each algorithm
+      }
+      tableData.push(row);
+    }
+    return tableData;
+  }
 
   async function fetchTSPRun(problemSize, algorithms) {
     if (!problemSize || problemSize <= 0 || problemSize > 1000) {
@@ -65,7 +98,9 @@ const TSPPage = () => {
       throw new Error('Network response was not ok');
     }
     const data = await response.json();
-    return data;
+    const nodes = data.nodes;
+    const solutions = data.solutions;
+    return {nodes, solutions};
   }
 
   async function fetchTSPExp(problemSize, expCount, expSteps, algorithms) {
@@ -99,14 +134,45 @@ const TSPPage = () => {
     setExpType(newExpType);
     setStepCount(0);
     setDataLoaded(false);
-    setGraphs([]);
     setLabels([]);
+    setNodes([]);
+    setSolutions([]);
+    setResults([]);
+    setDiagramPoints([]);
   }
 
   async function handleStepByStep(problemSize, algorithms){
     if (stepCount === 0){
-      handleDetailedRunComparison(problemSize, algorithms);
+      try {
+        setLabels(getLabels());
+        const data = await fetchTSPRun(problemSize, algorithms);
+        // Handle the response data as needed
+        console.log(data);
+        setNodes(data.nodes);
+        setSolutions(data.solutions);
+        let bestSols = [];
+        for (let i = 0; i < data.solutions.length; i++) {
+          const algoBestSol = data.solutions[i][0];
+          bestSols.push(algoBestSol);
+        }
+        setDiagramPoints(getDiagramPoints(data.nodes, bestSols));
+        setDataLoaded(true);
+  
+        
+      } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+        
+      }
     }
+    else{
+      let bestSols = [];
+      for (let i = 0; i < solutions.length; i++) {
+        const algoBestSol = solutions[i][stepCount+1];
+        bestSols.push(algoBestSol);
+      }
+      setDiagramPoints(getDiagramPoints(nodes, bestSols));
+    }
+    
     setStepCount(stepCount + 1);
   }
   async function handleDetailedRunComparison(problemSize, algorithms){
@@ -115,6 +181,14 @@ const TSPPage = () => {
       const data = await fetchTSPRun(problemSize, algorithms);
       // Handle the response data as needed
       console.log(data);
+      setNodes(data.nodes);
+      setSolutions(data.solutions);
+      let bestSols = [];
+      for (let i = 0; i < data.solutions.length; i++) {
+        const algoBestSol = data.solutions[i][data.solutions[i].length-1];
+        bestSols.push(algoBestSol);
+      }
+      setDiagramPoints(getDiagramPoints(data.nodes, bestSols));
       setDataLoaded(true);
 
       
@@ -128,7 +202,9 @@ const TSPPage = () => {
       setLabels(getLabels());
       const data = await fetchTSPExp(bitAmount, expCount, expSteps, algorithms);
       // Handle the response data as needed
-      console.log(data);
+      console.log(data.results);
+      setResults(data.results);
+      setTableData(performancesToTable(data.results));
       setDataLoaded(true);
 
       
@@ -143,17 +219,18 @@ const TSPPage = () => {
     const problemSize = document.getElementById('problemSize').value;
     const algorithms = getAlgorithmBits();
     
+    
     switch (parseInt(experimentType)) {
       case 0: //step by step
-        await handleStepByStep(problemSize, algorithms);
+        await handleStepByStep(problemSize, algorithms); // Await might not be needed here
         break;
       case 1: //detailed run comparison
-        await handleDetailedRunComparison(problemSize, algorithms);
+        await handleDetailedRunComparison(problemSize, algorithms); // Await might not be needed here
         break;
       case 2: //performance comparison
         const expCount = document.getElementById('expCount').value;
         const expSteps = document.getElementById('expSteps').value;
-        await handlePerformanceComparison(problemSize, expCount, expSteps, algorithms);
+        await handlePerformanceComparison(problemSize, expCount, expSteps, algorithms); // Await might not be needed here
         break;
     
       default:
@@ -212,8 +289,9 @@ const TSPPage = () => {
             </div>
             <button id="run" onClick={handleRunClick}>Run</button>
           </div>
-          <CoordinateSystem points={[{x: 50,y: 250},{x: 50,y: 150},{x: 450,y: 350}]} labels={labels} />
+          {diagramPoints.length>0 && <CoordinateSystem points={diagramPoints} labels={labels} />}
         </div>
+        {dataLoaded && <Table rows={tableData} labels={labels} stepCount={stepCount} />}
       </div>
     </div>
   );
