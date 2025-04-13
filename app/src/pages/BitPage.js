@@ -275,7 +275,7 @@ const BitPage = () => {
     <div>
       <h1>Bit Strings</h1>
       <div id="content"> 
-        <div id="topGrid">
+        <div class="bit-top-grid">
           <div id="parameters">
             <h2>Parameters</h2>
             <label htmlFor="experimentType">Experiment Type:</label>
