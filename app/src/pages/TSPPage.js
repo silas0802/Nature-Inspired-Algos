@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import CoordinateSystem from '../components/CoordinateSystem';
 import '../style/TSPPage.css';
 import Table from '../components/Table';
+import Graph from '../components/Graph';
 const TSPPage = () => {
 
   const [eaChecked, setEaChecked] = useState(true);
@@ -15,6 +16,7 @@ const TSPPage = () => {
   const [solutions, setSolutions] = useState([]);
   const [results, setResults] = useState([]);
   const [diagramPoints, setDiagramPoints] = useState([]);
+  const [graphData, setGraphData] = useState([]);
   const [tableData, setTableData] = useState([]);
   
   function getLabels(){
@@ -65,7 +67,7 @@ const TSPPage = () => {
     const steps = perflist[0].length;
     for (let i = 0; i < steps; i++) { //For each step
       let row = [];
-      const problemSize = Math.floor(document.getElementById('problemSize').value/(steps-1) * (i));
+      const problemSize = expType === 2 ? Math.floor(document.getElementById('problemSize').value/(steps-1) * (i)) : i;
       row.push(problemSize);
       for (let j = 0; j < perflist.length; j++) { //For each algorithm
         row.push(perflist[j][i]); // in the row add the performance at that step for each algorithm
@@ -73,6 +75,18 @@ const TSPPage = () => {
       tableData.push(row);
     }
     return tableData;
+  }
+  function resultsToGraphs(results){
+    let graphs = [];
+    for (let i = 0; i < results.length; i++) { // For each algorithm
+      let graph = [];
+      for (let j = 0; j < results[i].length; j++) { // For each step
+        const problemSize =  Math.floor(document.getElementById('problemSize').value/(results[i].length-1) * (j));
+        graph.push({x: expType === 2 ? problemSize : j, y: results[i][j]});
+      }
+      graphs.push(graph);
+    }
+    return graphs;
   }
 
   async function fetchTSPRun(problemSize, algorithms) {
@@ -98,9 +112,7 @@ const TSPPage = () => {
       throw new Error('Network response was not ok');
     }
     const data = await response.json();
-    const nodes = data.nodes;
-    const solutions = data.solutions;
-    return {nodes, solutions};
+    return data;
   }
 
   async function fetchTSPExp(problemSize, expCount, expSteps, algorithms) {
@@ -138,6 +150,8 @@ const TSPPage = () => {
     setNodes([]);
     setSolutions([]);
     setResults([]);
+    setTableData([]);
+    setGraphData([]);
     setDiagramPoints([]);
   }
 
@@ -147,15 +161,18 @@ const TSPPage = () => {
         setLabels(getLabels());
         const data = await fetchTSPRun(problemSize, algorithms);
         // Handle the response data as needed
-        console.log(data);
         setNodes(data.nodes);
         setSolutions(data.solutions);
+        setResults(data.results);
         let bestSols = [];
         for (let i = 0; i < data.solutions.length; i++) {
           const algoBestSol = data.solutions[i][0];
           bestSols.push(algoBestSol);
         }
         setDiagramPoints(getDiagramPoints(data.nodes, bestSols));
+        setTableData(performancesToTable(data.results));
+        setGraphData(resultsToGraphs(data.results));
+        setStepCount(1); // Set stepCount to 1 after the first run
         setDataLoaded(true);
   
         
@@ -166,29 +183,47 @@ const TSPPage = () => {
     }
     else{
       let bestSols = [];
+      if (stepCount >= solutions[0].length){
+        return;
+      }
       for (let i = 0; i < solutions.length; i++) {
-        const algoBestSol = solutions[i][stepCount+1];
+        const algoBestSol = solutions[i][stepCount];
         bestSols.push(algoBestSol);
       }
       setDiagramPoints(getDiagramPoints(nodes, bestSols));
+
+      // Look for next step with improvement
+      let currentStep = stepCount;
+      while (currentStep < results[0].length) {
+        for (let i = 0; i < results.length; i++) {
+          const algorithmResults = results[i];
+          if (algorithmResults[currentStep] !== algorithmResults[stepCount]) { // if we find a better result
+            setStepCount(currentStep);
+            return;
+          }
+        }
+        currentStep++;
+      }
+      setStepCount(results[0].length); // If no better result is found, set to last step
     }
     
-    setStepCount(stepCount + 1);
   }
   async function handleDetailedRunComparison(problemSize, algorithms){
     try {
       setLabels(getLabels());
       const data = await fetchTSPRun(problemSize, algorithms);
       // Handle the response data as needed
-      console.log(data);
       setNodes(data.nodes);
       setSolutions(data.solutions);
+      setResults(data.results);
       let bestSols = [];
       for (let i = 0; i < data.solutions.length; i++) {
         const algoBestSol = data.solutions[i][data.solutions[i].length-1];
         bestSols.push(algoBestSol);
       }
       setDiagramPoints(getDiagramPoints(data.nodes, bestSols));
+      setTableData(performancesToTable(data.results));
+      setGraphData(resultsToGraphs(data.results));
       setDataLoaded(true);
 
       
@@ -202,9 +237,8 @@ const TSPPage = () => {
       setLabels(getLabels());
       const data = await fetchTSPExp(bitAmount, expCount, expSteps, algorithms);
       // Handle the response data as needed
-      console.log(data.results);
-      setResults(data.results);
       setTableData(performancesToTable(data.results));
+      setGraphData(resultsToGraphs(data.results));
       setDataLoaded(true);
 
       
@@ -242,7 +276,7 @@ const TSPPage = () => {
     <div>
       <h1>Travelling Salesman Problem</h1>
       <div id="content"> 
-        <div id="topGrid">
+        <div class="tsp-top-grid">
           <div id="parameters">
             <h2>Parameters</h2>
             <label htmlFor="experimentType">Experiment Type:</label>
@@ -256,7 +290,7 @@ const TSPPage = () => {
             {parseInt(expType) === 2 && <label htmlFor="expCount">Exp Count:</label>}
             {parseInt(expType) === 2 && <input type="number" id="expCount" defaultValue={5} />}
             {parseInt(expType) === 2 && <label htmlFor="expSteps">Exp Steps:</label>}
-            {parseInt(expType) === 2 && <input type="number" id="expSteps" defaultValue={10} />}
+            {parseInt(expType) === 2 && <input type="number" id="expSteps" defaultValue={4} />}
             <div id="algorithms">
               <label>Algorithms:</label>
               <label>
@@ -288,10 +322,12 @@ const TSPPage = () => {
               </label>
             </div>
             <button id="run" onClick={handleRunClick}>Run</button>
+            {stepCount > 0 && <button id="newRun" onClick={resetExperiment}>Reset Experiment</button>}
           </div>
           {diagramPoints.length>0 && <CoordinateSystem points={diagramPoints} labels={labels} />}
+          {graphData.length > 0 && <Graph graphs={graphData} stepCount={stepCount} labels={labels} xName={expType!==2 ? "Iteration" : "Problem Size"} yName={"Distance"} noPoints/>}
         </div>
-        {dataLoaded && <Table rows={tableData} labels={labels} stepCount={stepCount} />}
+        {dataLoaded && <Table rows={tableData} labels={labels} stepCount={stepCount} firstColName={expType!==2 ? "Iteration" : "Problem Size"} />}
       </div>
     </div>
   );

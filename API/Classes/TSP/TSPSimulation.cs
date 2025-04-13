@@ -31,7 +31,7 @@ namespace API.Classes.TSP
             this.expSteps = expSteps;
         }
         
-        public (float[][], int[][][]) RunDetailedExperiment()
+        public (float[][], int[][][], float[][]) RunDetailedExperiment()
         {
 
             int bitstring = algorithmI;
@@ -53,8 +53,19 @@ namespace API.Classes.TSP
             }
             Debug.WriteLine($"Experiment finished with start value: {Utility.DisplayAnyList(startValue)}");
             //Debug.WriteLine($"Result:\n{Utility.DisplayAnyList(result)}");
-            
-            return (Utility.ConvertVectorsToFloatArray(nodes), result);
+
+            //Calculate distances for each iteration for all algorithms
+            float[][] distances = new float[result.Length][];
+            for (int i = 0; i < distances.Length; i++) // For each algorithm
+            {
+                distances[i] = new float[result[i].Length];
+                for (int j = 0; j < distances[i].Length; j++) // For each iteration
+                {
+                    distances[i][j] = Utility.TSPCalculateDistance(nodes, result[i][j]);
+                }
+            }
+
+            return (Utility.ConvertVectorsToFloatArray(nodes), result, distances);
 
         }
 

@@ -46,10 +46,6 @@ button:hover {
   box-sizing: border-box;
 }
 
-.line {
-  stroke-width: 2; /* Set line width */
-}
-
 .navbar {
   width: 100%;
   background-color: #333;

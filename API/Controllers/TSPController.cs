@@ -22,12 +22,12 @@ namespace API.Controllers
             }
             
             simulation.SetParametersForDetailed(problemSize, algorithmI);
-            (float[][], int[][][])? result = simulation.RunDetailedExperiment();
+            (float[][], int[][][], float[][])? result = simulation.RunDetailedExperiment();
             if (result == null)
             {
                 return BadRequest("Simulation failed");
             }
-            return Ok(new TSPRunResult(result.Value.Item1,result.Value.Item2));
+            return Ok(new TSPRunResult(result.Value.Item1,result.Value.Item2, result.Value.Item3));
         }
 
         [HttpGet("TSPExp")]
@@ -64,10 +64,13 @@ namespace API.Controllers
             public float[][] nodes { get; set; }
             public int[][][] solutions { get; set; }
 
-            public TSPRunResult(float[][] nodes, int[][][] solutions)
+            public float[][] results { get; set; }
+
+            public TSPRunResult(float[][] nodes, int[][][] solutions, float[][] results)
             {
                 this.nodes = nodes;
                 this.solutions = solutions;
+                this.results = results;
             }
         }
 

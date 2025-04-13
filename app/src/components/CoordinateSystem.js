@@ -40,6 +40,7 @@ const CoordinateSystem = ({ points, labels }) => {
 
   useEffect(() => {
     const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'cyan', 'magenta'];
+    const margin = { top: 40, right: 40, bottom: 50, left: 50 };
 
     if (dimensions.width === 0) return;
 
@@ -67,21 +68,66 @@ const CoordinateSystem = ({ points, labels }) => {
       .data(lines)
       .enter()
       .append('line')
-      .attr('class', 'line') // Add class
-      .attr('x1', d => d.x1)
-      .attr('y1', d => d.y1)
-      .attr('x2', d => d.x2)
-      .attr('y2', d => d.y2)
-      .attr('stroke', d => colors[d.algoI % colors.length]);
+      .attr('class', d => `line algo${d.algoI}`) // Add class
+      .attr('x1', d => d.x1 + margin.left)
+      .attr('y1', d => d.y1 + margin.top)
+      .attr('x2', d => d.x2 + margin.left)
+      .attr('y2', d => d.y2 + margin.top)
+      .attr('stroke', d => colors[d.algoI % colors.length])
+      .attr('stroke-width', d => 5-d.algoI);
+    
+    // Add line labels with hover effects
+    for (let i = 0; i < points.length; i++) {
+      svg.append('text')
+        .attr('class', `line-label algo${i}`) // Consistent class format
+        .attr('x', dimensions.width - margin.right)
+        .attr('y', margin.top + i * 20)
+        .attr('text-anchor', 'end')
+        .attr('font-size', '16px')
+        .attr('fill', colors[i % colors.length])
+        .text(labels[i])
+        .style('cursor', 'pointer') // Change cursor to indicate interactivity
+        .on('mouseenter', function() {
+          // Dim all lines
+          svg.selectAll('line')
+            .style('opacity', 0.2);
+          
+          // Highlight this algorithm's lines
+          svg.selectAll(`line.algo${i}`)
+            .style('opacity', 1)
+            .style('stroke-width', 5-i+2)
+            .style('filter', 'drop-shadow(0px 0px 3px rgba(0,0,0,0.5))');
+          
+          // Emphasize this label
+          d3.select(this)
+            .style('font-weight', 'bold')
+            .style('text-shadow', '1px 1px 2px rgba(0,0,0,0.2)');
+        })
+        .on('mouseleave', function() {
+          // Restore all lines
+          svg.selectAll('line')
+            .style('opacity', 1)
+            .style('stroke-width', d => 5-d.algoI)
+            .style('filter', 'none');
+          
+          // Restore this label
+          d3.select(this)
+            .style('font-weight', 'normal')
+            .style('text-shadow', 'none');
+        });
+    }
+    
 
-    // Add points
-    // svg.selectAll('circle')
-    //   .data(points)
-    //   .enter()
-    //   .append('circle')
-    //   .attr('class', 'point') // Add class
-    //   .attr('cx', d => d.x)
-    //   .attr('cy', d => d.y);
+    //Add points
+    svg.selectAll('circle')
+      .data(points[0])
+      .enter()
+      .append('circle')
+      .attr('class', 'point') // Add class
+      .attr('cx', d => d.x + margin.left)
+      .attr('cy', d => d.y + margin.top)
+      .attr('r', 5)
+      .attr('fill', 'lightcoral');
 
   }, [points, dimensions]);
 
