@@ -5,6 +5,8 @@ import Table from '../components/Table';
 import Graph from '../components/Graph';
 const TSPPage = () => {
 
+  const BACKEND_URL = 'https://localhost:7143/';
+
   const [eaChecked, setEaChecked] = useState(true);
   const [simAnnealChecked, setSimAnnealChecked] = useState(false);
   const [mmasChecked, setMmasChecked] = useState(false);
@@ -99,14 +101,20 @@ const TSPPage = () => {
       return;
     }
 
-    const url = `https://localhost:7143/TSP/TSPRun?problemSize=${problemSize}&algorithmI=${algorithms}`;
+    const endPointURL = BACKEND_URL+'TSP/TSPRun';
+    const parameters = {
+        problemSize: problemSize,
+        algorithmI: algorithms
+    };
+
     // Fetch data from the server
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      mode: 'cors', // Ensure CORS is enabled
+    const response = await fetch(endPointURL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(parameters),
+        mode: 'cors' // Ensure CORS is enabled
     });
     if (!response.ok) {
       throw new Error('Network response was not ok');
@@ -125,15 +133,24 @@ const TSPPage = () => {
       return;
     }
 
-    const url = `https://localhost:7143/TSP/TSPExp?maxProblemSize=${problemSize}&expCount=${expCount}&expSteps=${expSteps}&algorithmI=${algorithms}`;
+    const endPointURL = BACKEND_URL+'TSP/TSPExp';
+    const parameters = {
+        problemSize: problemSize,
+        algorithmI: algorithms,
+        expCount: expCount,
+        expSteps: expSteps
+    };
+
     // Fetch data from the server
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      mode: 'cors', // Ensure CORS is enabled
+    const response = await fetch(endPointURL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(parameters),
+        mode: 'cors' // Ensure CORS is enabled
     });
+
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }

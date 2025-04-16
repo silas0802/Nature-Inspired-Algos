@@ -7,7 +7,6 @@ namespace API.Classes.TSP
     {
         private Random random = new Random();
         public double[,] pheromone = new double[0, 0];
-        private int problemSize = 0; // Amount of points
         public int numAnts = 1; // Number of ants
         public double alpha = 1;
         public double beta = 1;
@@ -15,6 +14,8 @@ namespace API.Classes.TSP
         public double minPheromone = 0; // Lowest pheromone level
         public double maxPheromone = 0; // Highest pheromone level 
 
+        private int problemSize = 0; // Amount of points
+        private double[,] distancePowers = new double[0, 0];
 
         public override int[] Mutate(int[] original)
         {
@@ -40,8 +41,6 @@ namespace API.Classes.TSP
             return bestSolution;
         }
 
-
-
         public double[,] InitializePheromone(int length)
         {
             double[,] pheromone = new double[length, length];
@@ -55,38 +54,77 @@ namespace API.Classes.TSP
             return pheromone;
         }
 
+        public override void InitializeAlgorithm(Vector2[] nodes)
+        {
+            base.InitializeAlgorithm(nodes);
+            problemSize = nodes.Length;
+            minPheromone = 1.0 / (problemSize * problemSize);
+            maxPheromone = 1.0 - 1 / problemSize;
+            pheromone = InitializePheromone(problemSize);
+
+            distancePowers = new double[problemSize, problemSize];
+            for (int i = 0; i < problemSize; i++)
+            {
+                for (int j = 0; j < problemSize; j++)
+                {
+                    if (i != j)
+                    {
+                        double inverseDistance = 1.0 / Vector2.Distance(nodes[i], nodes[j]);
+                        distancePowers[i, j] = Math.Pow(inverseDistance, beta);
+                    }
+                }
+            }
+        }
+
         public int[] ConstructSolution()
         {
-            List<int> unvisited = Enumerable.Range(0, problemSize).ToList();
+            List<int> unvisited = new List<int>(Enumerable.Range(0, problemSize));
             int[] solution = new int[problemSize];
             int currentNode = random.Next(problemSize);
             solution[0] = currentNode;
             unvisited.Remove(currentNode);
 
+            double[,] pheromonePowers = new double[problemSize, problemSize];
+
+            for (int i = 0; i < problemSize; i++)
+            {
+                for (int j = 0; j < problemSize; j++)
+                {
+                    if (i != j)
+                    {
+                        pheromonePowers[i, j] = Math.Pow(pheromone[i, j], alpha);
+                    }
+                }
+            }
+
             for (int i = 1; i < problemSize; i++)
             {
                 double[] probabilities = new double[unvisited.Count];
                 double sumProb = 0;
+                int index = 0;
 
-                for (int j = 0; j < unvisited.Count; j++)
+                foreach (int nextNode in unvisited)
                 {
-                    int nextNode = unvisited[j];
-                    probabilities[j] = Math.Pow(pheromone[currentNode, nextNode], alpha) * Math.Pow(1.0 / Vector2.Distance(nodes[currentNode], nodes[nextNode]), beta);
-                    sumProb += probabilities[j];
+                    probabilities[index] = pheromonePowers[currentNode, nextNode] * distancePowers[currentNode, nextNode];
+                    sumProb += probabilities[index];
+                    index++;
                 }
 
                 double rand = random.NextDouble() * sumProb;
                 double cumulativeProb = 0;
-                for (int j = 0; j < unvisited.Count; j++)
+                index = 0;
+
+                foreach (int nextNode in unvisited)
                 {
-                    cumulativeProb += probabilities[j];
+                    cumulativeProb += probabilities[index];
                     if (rand <= cumulativeProb)
                     {
-                        currentNode = unvisited[j];
+                        currentNode = nextNode;
                         solution[i] = currentNode;
-                        unvisited.RemoveAt(j);
+                        unvisited.Remove(currentNode);
                         break;
                     }
+                    index++;
                 }
             }
             return solution;
@@ -118,15 +156,6 @@ namespace API.Classes.TSP
             pheromone[last, first] += rho / bestFitness;
             pheromone[last, first] = Math.Min(pheromone[last, first], maxPheromone);
         }
-
-        public override void InitializeAlgorithm(Vector2[] nodes)
-        {
-            base.InitializeAlgorithm(nodes);
-            problemSize = nodes.Length;
-            minPheromone = 1.0 / (problemSize * problemSize);
-            maxPheromone = 1.0 - 1 / problemSize;
-            pheromone = InitializePheromone(problemSize);
-        }
-
     }
 }
+

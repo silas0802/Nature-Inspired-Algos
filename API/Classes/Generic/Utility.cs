@@ -165,6 +165,19 @@ namespace API.Classes.Generic
             return path.ToArray();
         }
 
+        public static bool ValidateTSPSolution(int[] solution)
+        {
+            int problemSize = solution.Length;
+            for (int i = 0; i < problemSize; i++)
+            {
+                if (!solution.Contains(i))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         /// <summary>
         /// !!!Deprecated!!! Generates a random result based on the specified parameters. Used for testing.
         /// </summary>

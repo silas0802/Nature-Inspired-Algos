@@ -339,7 +339,7 @@ const BitPage = () => {
             />}
         </div>
         {dataLoaded && <h3>Experiment Data</h3>}
-        {dataLoaded && <Table rows={tableData} labels={labels} stepCount={stepCount} />}   
+        {dataLoaded && <Table rows={tableData} labels={labels} firstColName={expType!==2 ? "Iterations" : "Problem Size"} stepCount={stepCount} />}   
       </div>
     </div>
   );

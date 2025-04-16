@@ -9,19 +9,19 @@ namespace API.Controllers
     {
         TSPSimulation simulation = new TSPSimulation();
 
-        [HttpGet("TSPRun")]
-        public ActionResult<TSPRunResult> TSPRun(int problemSize, int algorithmI)
+        [HttpPost("TSPRun")]
+        public ActionResult<TSPRunResult> TSPRun([FromBody] TSPRunParameters parameters)
         {
-            if (problemSize <= 0 || problemSize > TSPSimulation.MAX_PROBLEM_SIZE)
+            if (parameters.ProblemSize <= 0 || parameters.ProblemSize > TSPSimulation.MAX_PROBLEM_SIZE)
             {
                 return BadRequest($"N must be between 1 and {TSPSimulation.MAX_PROBLEM_SIZE}");
             }
-            if (algorithmI <= 0 || algorithmI > MathF.Pow(2, TSPSimulation.ALGORITHM_COUNT) - 1)
+            if (parameters.AlgorithmI <= 0 || parameters.AlgorithmI > MathF.Pow(2, TSPSimulation.ALGORITHM_COUNT) - 1)
             {
                 return BadRequest("Invalid algorithm(s) selected");
             }
             
-            simulation.SetParametersForDetailed(problemSize, algorithmI);
+            simulation.SetParametersForDetailed(parameters.ProblemSize, parameters.AlgorithmI);
             (float[][], int[][][], float[][])? result = simulation.RunDetailedExperiment();
             if (result == null)
             {
@@ -30,27 +30,27 @@ namespace API.Controllers
             return Ok(new TSPRunResult(result.Value.Item1,result.Value.Item2, result.Value.Item3));
         }
 
-        [HttpGet("TSPExp")]
-        public ActionResult<TSPExpResult> TSPExp(int maxProblemSize, int expCount, int expSteps, int algorithmI)
+        [HttpPost("TSPExp")]
+        public ActionResult<TSPExpResult> TSPExp([FromBody] TSPExpParameters parameters)
         {
-            if (maxProblemSize <= 0 || maxProblemSize > TSPSimulation.MAX_PROBLEM_SIZE)
+            if (parameters.MaxProblemSize <= 0 || parameters.MaxProblemSize > TSPSimulation.MAX_PROBLEM_SIZE)
             {
                 return BadRequest($"N must be between 1 and {TSPSimulation.MAX_PROBLEM_SIZE}");
             }
-            if (expCount <= 0 || expCount > TSPSimulation.MAX_EXPERIMENT_COUNT)
+            if (parameters.ExpCount <= 0 || parameters.ExpCount > TSPSimulation.MAX_EXPERIMENT_COUNT)
             {
-                return BadRequest($"experiment count must be between 1 and {TSPSimulation.MAX_EXPERIMENT_COUNT} \nbut was {expCount}");
+                return BadRequest($"experiment count must be between 1 and {TSPSimulation.MAX_EXPERIMENT_COUNT} \nbut was {parameters.ExpCount}");
             }
-            if (expSteps <= 0 || expSteps > TSPSimulation.MAX_EXPERIMENT_STEPS)
+            if (parameters.ExpSteps <= 0 || parameters.ExpSteps > TSPSimulation.MAX_EXPERIMENT_STEPS)
             {
-                return BadRequest($"experiment steps must be between 1 and {TSPSimulation.MAX_EXPERIMENT_STEPS} \nbut was {expSteps}");
+                return BadRequest($"experiment steps must be between 1 and {TSPSimulation.MAX_EXPERIMENT_STEPS} \nbut was {parameters.ExpSteps}");
             }
-            if (algorithmI <= 0 || algorithmI > MathF.Pow(2, TSPSimulation.ALGORITHM_COUNT) - 1)
+            if (parameters.AlgorithmI <= 0 || parameters.AlgorithmI > MathF.Pow(2, TSPSimulation.ALGORITHM_COUNT) - 1)
             {
                 return BadRequest("Invalid algorithm(s) selected");
             }
             
-            simulation.SetParametersForMultiExperiment(maxProblemSize, expCount, expSteps, algorithmI);
+            simulation.SetParametersForMultiExperiment(parameters.MaxProblemSize, parameters.ExpCount, parameters.ExpSteps, parameters.AlgorithmI);
             float[][]? result = simulation.RunComparisonExperiment();
 
             if (result == null)
@@ -58,6 +58,18 @@ namespace API.Controllers
                 return BadRequest("Simulation failed");
             }
             return Ok(new TSPExpResult(result));
+        }
+        public class TSPRunParameters
+        {
+            public int ProblemSize { get; set; }
+            public int AlgorithmI { get; set; }
+        }
+        public class TSPExpParameters
+        {
+            public int MaxProblemSize { get; set; }
+            public int AlgorithmI { get; set; }
+            public int ExpCount { get; set; }
+            public int ExpSteps { get; set; }
         }
         public class TSPRunResult
         {

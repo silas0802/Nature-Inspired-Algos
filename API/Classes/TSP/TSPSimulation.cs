@@ -1,5 +1,4 @@
-﻿using API.Classes.BitStrings;
-using API.Classes.Generic;
+﻿using API.Classes.Generic;
 using System.Diagnostics;
 using System.Numerics;
 
@@ -7,8 +6,8 @@ namespace API.Classes.TSP
 {
     public class TSPSimulation : Simulation
     {
-        public new const int MAX_PROBLEM_SIZE = 100;
-        public new const int MAX_ITERATIONS = 200;
+        public new const int MAX_PROBLEM_SIZE = 1000;
+        public new const int MAX_ITERATIONS = 5000;
         public void SetParametersForDetailed(int problemSize, int algorithmI)
         {
             this.problemSize = problemSize;
