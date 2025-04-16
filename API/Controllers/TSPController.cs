@@ -20,8 +20,12 @@ namespace API.Controllers
             {
                 return BadRequest("Invalid algorithm(s) selected");
             }
+            if (parameters.Iterations <= 0 || parameters.Iterations > TSPSimulation.MAX_ITERATIONS)
+            {
+                return BadRequest($"Iterations must be between 0 and {TSPSimulation.MAX_ITERATIONS}");
+            }
             
-            simulation.SetParametersForDetailed(parameters.ProblemSize, parameters.AlgorithmI);
+            simulation.SetParametersForDetailed(parameters.ProblemSize, parameters.Iterations, parameters.AlgorithmI);
             (float[][], int[][][], float[][])? result = simulation.RunDetailedExperiment();
             if (result == null)
             {
@@ -50,7 +54,7 @@ namespace API.Controllers
                 return BadRequest("Invalid algorithm(s) selected");
             }
             
-            simulation.SetParametersForMultiExperiment(parameters.MaxProblemSize, parameters.ExpCount, parameters.ExpSteps, parameters.AlgorithmI);
+            simulation.SetParametersForMultiExperiment(parameters.MaxProblemSize, parameters.Iterations, parameters.ExpCount, parameters.ExpSteps, parameters.AlgorithmI);
             float[][]? result = simulation.RunComparisonExperiment();
 
             if (result == null)
@@ -63,10 +67,13 @@ namespace API.Controllers
         {
             public int ProblemSize { get; set; }
             public int AlgorithmI { get; set; }
+            public int Iterations { get; set; }
         }
         public class TSPExpParameters
         {
             public int MaxProblemSize { get; set; }
+            public int Iterations { get; set; }
+
             public int AlgorithmI { get; set; }
             public int ExpCount { get; set; }
             public int ExpSteps { get; set; }

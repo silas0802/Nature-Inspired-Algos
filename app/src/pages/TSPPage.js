@@ -91,7 +91,7 @@ const TSPPage = () => {
     return graphs;
   }
 
-  async function fetchTSPRun(problemSize, algorithms) {
+  async function fetchTSPRun(problemSize, algorithms, iterations) {
     if (!problemSize || problemSize <= 0 || problemSize > 1000) {
       alert('Bit amount must be between 1 and 1000');
       return;
@@ -104,7 +104,8 @@ const TSPPage = () => {
     const endPointURL = BACKEND_URL+'TSP/TSPRun';
     const parameters = {
         problemSize: problemSize,
-        algorithmI: algorithms
+        algorithmI: algorithms,
+        iterations: iterations,
     };
 
     // Fetch data from the server
@@ -123,7 +124,7 @@ const TSPPage = () => {
     return data;
   }
 
-  async function fetchTSPExp(problemSize, expCount, expSteps, algorithms) {
+  async function fetchTSPExp(problemSize, expCount, expSteps, algorithms, iterations) {
     if (!problemSize || problemSize <= 0 || problemSize > 1000) {
       alert('Bit amount must be between 1 and 1000');
       return;
@@ -135,7 +136,8 @@ const TSPPage = () => {
 
     const endPointURL = BACKEND_URL+'TSP/TSPExp';
     const parameters = {
-        problemSize: problemSize,
+        maxProblemSize: problemSize,
+        iterations: iterations,
         algorithmI: algorithms,
         expCount: expCount,
         expSteps: expSteps
@@ -152,7 +154,7 @@ const TSPPage = () => {
     });
 
     if (!response.ok) {
-      throw new Error('Network response was not ok');
+      throw new Error('Network response was not ok ' + response.statusText);
     }
     const data = await response.json();
     return data;
@@ -172,11 +174,11 @@ const TSPPage = () => {
     setDiagramPoints([]);
   }
 
-  async function handleStepByStep(problemSize, algorithms){
+  async function handleStepByStep(problemSize, algorithms, iterations){
     if (stepCount === 0){
       try {
         setLabels(getLabels());
-        const data = await fetchTSPRun(problemSize, algorithms);
+        const data = await fetchTSPRun(problemSize, algorithms, iterations);
         // Handle the response data as needed
         setNodes(data.nodes);
         setSolutions(data.solutions);
@@ -225,10 +227,10 @@ const TSPPage = () => {
     }
     
   }
-  async function handleDetailedRunComparison(problemSize, algorithms){
+  async function handleDetailedRunComparison(problemSize, algorithms, iterations){
     try {
       setLabels(getLabels());
-      const data = await fetchTSPRun(problemSize, algorithms);
+      const data = await fetchTSPRun(problemSize, algorithms, iterations);
       // Handle the response data as needed
       setNodes(data.nodes);
       setSolutions(data.solutions);
@@ -249,10 +251,10 @@ const TSPPage = () => {
       
     }
   }
-  async function handlePerformanceComparison(bitAmount, expCount, expSteps, algorithms){
+  async function handlePerformanceComparison(bitAmount, expCount, expSteps, algorithms, iterations){
     try {
       setLabels(getLabels());
-      const data = await fetchTSPExp(bitAmount, expCount, expSteps, algorithms);
+      const data = await fetchTSPExp(bitAmount, expCount, expSteps, algorithms, iterations);
       // Handle the response data as needed
       setTableData(performancesToTable(data.results));
       setGraphData(resultsToGraphs(data.results));
@@ -268,20 +270,21 @@ const TSPPage = () => {
   const handleRunClick = async () => {
     const experimentType = document.getElementById('experimentType').value;
     const problemSize = document.getElementById('problemSize').value;
+    const iterationCount = document.getElementById('iterationCount').value;
     const algorithms = getAlgorithmBits();
     
     
     switch (parseInt(experimentType)) {
       case 0: //step by step
-        await handleStepByStep(problemSize, algorithms); // Await might not be needed here
+        await handleStepByStep(problemSize, algorithms, iterationCount); // Await might not be needed here
         break;
       case 1: //detailed run comparison
-        await handleDetailedRunComparison(problemSize, algorithms); // Await might not be needed here
+        await handleDetailedRunComparison(problemSize, algorithms, iterationCount); // Await might not be needed here
         break;
       case 2: //performance comparison
         const expCount = document.getElementById('expCount').value;
         const expSteps = document.getElementById('expSteps').value;
-        await handlePerformanceComparison(problemSize, expCount, expSteps, algorithms); // Await might not be needed here
+        await handlePerformanceComparison(problemSize, expCount, expSteps, algorithms, iterationCount); // Await might not be needed here
         break;
     
       default:
@@ -294,7 +297,7 @@ const TSPPage = () => {
       <h1>Travelling Salesman Problem</h1>
       <div id="content"> 
         <div class="tsp-top-grid">
-          <div id="parameters">
+          <div className='parameters tsp-parameters'>
             <h2>Parameters</h2>
             <label htmlFor="experimentType">Experiment Type:</label>
             <select id="experimentType" onChange={resetExperiment}>
@@ -302,6 +305,8 @@ const TSPPage = () => {
               <option value="1">Detailed run comparison</option>
               <option value="2">Performance comparison</option>
             </select>
+            <label htmlFor="iterationCount">Iterations:</label>
+            <input type="number" id="iterationCount" defaultValue={500} />
             <label htmlFor="problemSize">Problem Size:</label>
             <input type="number" id="problemSize" defaultValue={8} />
             {parseInt(expType) === 2 && <label htmlFor="expCount">Exp Count:</label>}
@@ -341,8 +346,15 @@ const TSPPage = () => {
             <button id="run" onClick={handleRunClick}>Run</button>
             {stepCount > 0 && <button id="newRun" onClick={resetExperiment}>Reset Experiment</button>}
           </div>
+          <div className="parameters tsp-algoparams">
+            <h2 style={{opacity: 0}}>{": "}</h2>
+            <label htmlFor="alpha">Alpha</label>
+            <input type="number" id="alpha" defaultValue={1} />
+            <label htmlFor="beta">Beta</label>
+            <input type="number" id="beta" defaultValue={1} />
+          </div>
           {diagramPoints.length>0 && <CoordinateSystem points={diagramPoints} labels={labels} />}
-          {graphData.length > 0 && <Graph graphs={graphData} stepCount={stepCount} labels={labels} xName={expType!==2 ? "Iteration" : "Problem Size"} yName={"Distance"} noPoints/>}
+          {graphData.length > 0 && <Graph className={"tsp-graph"} graphs={graphData} stepCount={stepCount} labels={labels} xName={expType!==2 ? "Iteration" : "Problem Size"} yName={"Distance"} noPoints/>}
         </div>
         {dataLoaded && <Table rows={tableData} labels={labels} stepCount={stepCount} firstColName={expType!==2 ? "Iteration" : "Problem Size"} />}
       </div>

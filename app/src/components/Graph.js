@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
 
-const Graph = ({ stepCount, graphs, xName, yName, labels, noPoints, sorted}) => {
+const Graph = ({ stepCount, graphs, xName, yName, labels, noPoints, sorted, className}) => {
   const svgRef = useRef();
   const containerRef = useRef();
   const [dimensions, setDimensions] = useState({ width: 500, height: 500 });
@@ -155,7 +155,7 @@ const Graph = ({ stepCount, graphs, xName, yName, labels, noPoints, sorted}) => 
   }, [dimensions, graphs, noPoints, sorted, xName, yName, labels, stepCount]);
 
   return (
-    <div ref={containerRef} className="Graph"  style={{ width: '100%'}}>
+<div ref={containerRef} className={`Graph ${className}`} style={{ width: '100%'}}>
       <svg 
         ref={svgRef} 
       ></svg>

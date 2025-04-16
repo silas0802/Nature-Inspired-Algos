@@ -39,11 +39,24 @@ button:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for a nice effect */
   padding: 10px;
   box-sizing: border-box;
+  max-width: 800px; /* Limit width to 800px */
+  max-height: 600px; /* Limit height to 600px */
+  width: 100%; /* Ensure it fills its container */
+  margin-top: 3rem;
 }
 
-.BitDiagram {
-  padding: 10px;  
-  box-sizing: border-box;
+
+
+
+.table-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  border: 1px solid #ddd; /* Add visible border to scrollable container */
 }
 
 .navbar {
@@ -79,4 +92,14 @@ button:hover {
   color: black;
 }
 
-
+.parameters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#algorithms {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}

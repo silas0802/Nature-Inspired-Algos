@@ -1,28 +1,20 @@
-.CoordinateSystem, .Graph {
-    grid-column: span 2; /* Ensure it spans 2 columns */
-    max-width: 800px; /* Limit width to 800px */
-    max-height: 600px; /* Limit height to 600px */
-    width: 100%; /* Ensure it fills its container */
-    margin-top: 3rem;
-    
+.tsp-graph{
+    grid-column: span 3;
 }
-
+.CoordinateSystem{
+    grid-column: span 3;
+}
+.tsp-parameters{
+  grid-column: span 2;
+}
+.tsp-algoparams{
+    grid-column: span 1;
+}
 .tsp-top-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-auto-rows: 800px; /* Set row height to 600px */
+    grid-template-columns: repeat(9, 1fr);
+    grid-auto-rows: auto; /* Set row height to 600px */
     gap: 20px;
     justify-content: center;
 }
-#parameters {
-    grid-column: span 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-#algorithms {
-    margin-top: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
+

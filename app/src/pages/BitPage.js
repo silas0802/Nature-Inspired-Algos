@@ -276,7 +276,7 @@ const BitPage = () => {
       <h1>Bit Strings</h1>
       <div id="content"> 
         <div class="bit-top-grid">
-          <div id="parameters">
+          <div className='parameters bit-parameters'>
             <h2>Parameters</h2>
             <label htmlFor="experimentType">Experiment Type:</label>
             <select id="experimentType" onChange={resetExperiment}>
@@ -329,7 +329,7 @@ const BitPage = () => {
             {stepCount > 0 && <button id="newRun" onClick={resetExperiment}>New Run</button>}
           </div>
           {dataLoaded && expType!==2 && <BitDiagram bitEntries={bitEntries} stepCount={stepCount} />}
-          {dataLoaded && <Graph 
+          {dataLoaded && <Graph className={"bit-graph"}
             stepCount={stepCount}
             graphs={graphs} 
             xName={expType!==2 ? "Iterations" : "Problem Size"} 

@@ -8,9 +8,11 @@ namespace API.Classes.TSP
     {
         public new const int MAX_PROBLEM_SIZE = 1000;
         public new const int MAX_ITERATIONS = 5000;
-        public void SetParametersForDetailed(int problemSize, int algorithmI)
+        public int iterations;
+        public void SetParametersForDetailed(int problemSize, int iterations, int algorithmI)
         {
             this.problemSize = problemSize;
+            this.iterations = iterations;
             this.algorithmI = algorithmI;
             this.expCount = 1;
             this.expSteps = 1;
@@ -23,9 +25,9 @@ namespace API.Classes.TSP
         /// <param name="expSteps">How many experiments with different problemsizes will be executed</param>
         /// <param name="algorithmI">The algorithm indexes, each bit corresponds to an algorithm.</param>
         /// <param name="problemI">The problem index.</param>
-        public void SetParametersForMultiExperiment(int maxProblemSize, int expCount, int expSteps, int algorithmI)
+        public void SetParametersForMultiExperiment(int maxProblemSize, int iterations, int expCount, int expSteps, int algorithmI)
         {
-            SetParametersForDetailed(maxProblemSize, algorithmI);
+            SetParametersForDetailed(maxProblemSize,iterations, algorithmI);
             this.expCount = expCount;
             this.expSteps = expSteps;
         }
@@ -79,10 +81,14 @@ namespace API.Classes.TSP
 
             int bitstring = algorithmI;
             float[][] result = new float[Utility.CountSetBits((ulong)algorithmI)][];
-            Vector2[][] nodes = new Vector2[expSteps][];
+            Vector2[][][] nodes = new Vector2[expSteps][][];
             for (int i = 0; i < expSteps; i++)
             {
-                nodes[i] = Utility.GenerateRandomGraph(problemSize/expSteps*(i+1), 500, 500);
+                nodes[i] = new Vector2[expCount][];
+                for (int j = 0; j < expCount; j++)
+                {
+                    nodes[i][j] = Utility.GenerateRandomGraph(problemSize/expSteps*(i+1), 500, 500);
+                }
             }
 
             int currentAlgo = 0;
@@ -112,7 +118,7 @@ namespace API.Classes.TSP
             List<int[]> result = new List<int[]>();
             result.Add(startValue);
             algorithm.InitializeAlgorithm(nodes);
-            for (int i = 0; i < MAX_ITERATIONS; i++)
+            for (int i = 0; i < iterations; i++)
             {
                 int[] bestRes = result[result.Count - 1];
                 int[] mutatedRes = algorithm.Mutate(bestRes);
@@ -130,37 +136,37 @@ namespace API.Classes.TSP
         /// <param name="startValue">The initial path</param>
         /// <param name="algorithm">The selected algorithm</param>
         /// <returns>A list of average number of iterations to solve the problem at each problemsize.</returns>
-        public float[] RunMultiSimulation(int[] startValue, Vector2[][] nodes, TSPAlgorithm algorithm)
+        public float[] RunMultiSimulation(int[] startValue, Vector2[][][] nodes, TSPAlgorithm algorithm)
         {
             float[] results = new float[expSteps + 1];
 
             for (int k = 0; k < expSteps; k++)
             {
-                int[] stepStartVal = Utility.RandomTSPSolution(nodes[k].Length);
+                int[] stepStartVal = Utility.RandomTSPSolution(nodes[k][0].Length);
                 float[] stepResults = new float[expCount];
                 for (int i = 0; i < expCount; i++)
                 {
-                    algorithm.InitializeAlgorithm(nodes[k]);
+                    algorithm.InitializeAlgorithm(nodes[k][i]);
 
                     int[] bestRes = stepStartVal;
-                    for (int j = 1; j < MAX_ITERATIONS; j++)
+                    for (int j = 1; j < iterations; j++)
                     {
                         int[] mutatedRes = algorithm.Mutate(bestRes);
-                        if (Utility.TSPCompare(nodes[k], bestRes, mutatedRes))
+                        if (Utility.TSPCompare(nodes[k][i], bestRes, mutatedRes))
                         {
                             bestRes = mutatedRes;
                         }
 
 
                         
-                        if (j == MAX_ITERATIONS - 1)
+                        if (j == iterations - 1)
                         {
-                            stepResults[i] = Utility.TSPCalculateDistance(nodes[k],bestRes);
+                            stepResults[i] = Utility.TSPCalculateDistance(nodes[k][i],bestRes);
                         }
                     }
                 }
                 results[k+1] = (float)stepResults.Sum() / expCount;
-                Debug.WriteLine($"For problemsize {stepStartVal.Length} Average: {results[k+1]} Initially: {Utility.TSPCalculateDistance(nodes[k], stepStartVal)}");
+                Debug.WriteLine($"For problemsize {stepStartVal.Length} Average: {results[k+1]} ");
             }
             return results;
         }

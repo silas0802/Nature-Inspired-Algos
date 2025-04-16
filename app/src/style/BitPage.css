@@ -1,46 +1,25 @@
-.Graph {
-    grid-column: span 2; /* Ensure it spans 2 columns */
-    max-width: 800px; /* Limit width to 800px */
-    max-height: 600px; /* Limit height to 600px */
-    width: 100%; /* Ensure it fills its container */
-    margin-top: 3rem;
-}
-.BitDiagram {
-    grid-column: span 1;
-    margin-top: 3rem;
-    max-width: 360px;
-
+.bit-graph{
+    grid-column: span 5;
 }
 
+.bit-parameters{
+    grid-column: span 2;
+  }
 .bit-top-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: 800px; /* Set row height to 600px */
+    grid-template-columns: repeat(9, 1fr);
+    grid-auto-rows: auto; /* Set row height to 600px */
     gap: 20px;
     justify-content: center;
 }
-#parameters {
-    grid-column: span 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-#algorithms {
-    margin-top: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
 
-.table-container {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
-    margin-bottom: 1rem;
-    display: block;
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-    border: 1px solid #ddd; /* Add visible border to scrollable container */
-}
+.BitDiagram {
+    padding: 10px;  
+    box-sizing: border-box;
+    margin-top: 3rem;
+    max-width: 360px;
+    grid-column: span 2;
+  }
 
 .bit-table {
     width: max-content; /* Allow table to take its natural width */
