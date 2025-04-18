@@ -40,7 +40,7 @@ const CoordinateSystem = ({ points, labels }) => {
 
   useEffect(() => {
     const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'cyan', 'magenta'];
-    const margin = { top: 40, right: 40, bottom: 50, left: 50 };
+    const margin = { top: 40, right: 40, bottom: 50, left: -40 };
 
     if (dimensions.width === 0) return;
 
@@ -129,7 +129,7 @@ const CoordinateSystem = ({ points, labels }) => {
       .attr('r', 5)
       .attr('fill', 'lightcoral');
 
-  }, [points, dimensions]);
+  }, [points, dimensions, labels]);
 
   return (
     <div ref={containerRef} className="CoordinateSystem" style={{ width: '100%', height: '100%' }}>

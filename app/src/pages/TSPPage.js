@@ -348,10 +348,10 @@ const TSPPage = () => {
           </div>
           <div className="parameters tsp-algoparams">
             <h2 style={{opacity: 0}}>{": "}</h2>
-            <label htmlFor="alpha">Alpha</label>
-            <input type="number" id="alpha" defaultValue={1} />
-            <label htmlFor="beta">Beta</label>
-            <input type="number" id="beta" defaultValue={1} />
+            {mmasChecked && <label htmlFor="alpha">MMAS Alpha</label>}
+            {mmasChecked && <input type="number" id="alpha" defaultValue={1} />}
+            {mmasChecked && <label htmlFor="beta">MMAS Beta</label>}
+            {mmasChecked && <input type="number" id="beta" defaultValue={1} />}
           </div>
           {diagramPoints.length>0 && <CoordinateSystem points={diagramPoints} labels={labels} />}
           {graphData.length > 0 && <Graph className={"tsp-graph"} graphs={graphData} stepCount={stepCount} labels={labels} xName={expType!==2 ? "Iteration" : "Problem Size"} yName={"Distance"} noPoints/>}

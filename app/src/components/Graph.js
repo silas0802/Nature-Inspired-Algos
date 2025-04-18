@@ -102,14 +102,15 @@ const Graph = ({ stepCount, graphs, xName, yName, labels, noPoints, sorted, clas
         .attr('y1', d => d.y1)
         .attr('x2', d => d.x2)
         .attr('y2', d => d.y2)
-        .attr('stroke', colors[i % colors.length]);
+        .attr('stroke', colors[i % colors.length])
+        .attr('stroke-width', 2);
 
       // Add line labels
       svg.append('text')
         .attr('x', dimensions.width - margin.right)
         .attr('y', margin.top + i * 20)
         .attr('text-anchor', 'end')
-        .attr('font-size', '12px')
+        .attr('font-size', '16px')
         .attr('fill', colors[i % colors.length])
         .text(labels[i]);
     }

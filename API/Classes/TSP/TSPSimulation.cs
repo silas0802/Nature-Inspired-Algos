@@ -9,13 +9,15 @@ namespace API.Classes.TSP
         public new const int MAX_PROBLEM_SIZE = 1000;
         public new const int MAX_ITERATIONS = 5000;
         public int iterations;
-        public void SetParametersForDetailed(int problemSize, int iterations, int algorithmI)
+        private AlgorithmParameters? algorithmParameters;
+        public void SetParametersForDetailed(AlgorithmParameters algorithmParameters)
         {
-            this.problemSize = problemSize;
-            this.iterations = iterations;
-            this.algorithmI = algorithmI;
+            this.problemSize = algorithmParameters.problemSize;
+            this.iterations = algorithmParameters.iterations;
+            this.algorithmI = algorithmParameters.algorithmI;
             this.expCount = 1;
             this.expSteps = 1;
+            this.algorithmParameters = algorithmParameters;
         }
         /// <summary>
         /// 
@@ -25,16 +27,16 @@ namespace API.Classes.TSP
         /// <param name="expSteps">How many experiments with different problemsizes will be executed</param>
         /// <param name="algorithmI">The algorithm indexes, each bit corresponds to an algorithm.</param>
         /// <param name="problemI">The problem index.</param>
-        public void SetParametersForMultiExperiment(int maxProblemSize, int iterations, int expCount, int expSteps, int algorithmI)
+        public void SetParametersForMultiExperiment(AlgorithmParameters algorithmParameters)
         {
-            SetParametersForDetailed(maxProblemSize,iterations, algorithmI);
+            SetParametersForDetailed(algorithmParameters);
             this.expCount = expCount;
             this.expSteps = expSteps;
         }
         
         public (float[][], int[][][], float[][]) RunDetailedExperiment()
         {
-
+            
             int bitstring = algorithmI;
             int[][][] result = new int[Utility.CountSetBits((ulong)algorithmI)][][];
             Vector2[] nodes = Utility.GenerateRandomGraph(problemSize, 500, 500);
@@ -115,9 +117,11 @@ namespace API.Classes.TSP
         /// <returns>A list of the best solution at each iteration</returns>
         public int[][] RunDetailedSimulation(int[] startValue, Vector2[] nodes, TSPAlgorithm algorithm)
         {
+            if (algorithmParameters == null) throw new NullReferenceException("Algorithm parameters must be set before experiment");
+
             List<int[]> result = new List<int[]>();
             result.Add(startValue);
-            algorithm.InitializeAlgorithm(nodes);
+            algorithm.InitializeAlgorithm(nodes, algorithmParameters);
             for (int i = 0; i < iterations; i++)
             {
                 int[] bestRes = result[result.Count - 1];
@@ -138,6 +142,8 @@ namespace API.Classes.TSP
         /// <returns>A list of average number of iterations to solve the problem at each problemsize.</returns>
         public float[] RunMultiSimulation(int[] startValue, Vector2[][][] nodes, TSPAlgorithm algorithm)
         {
+            if (algorithmParameters == null) throw new NullReferenceException("Algorithm parameters must be set before experiment");
+            
             float[] results = new float[expSteps + 1];
 
             for (int k = 0; k < expSteps; k++)
@@ -146,7 +152,7 @@ namespace API.Classes.TSP
                 float[] stepResults = new float[expCount];
                 for (int i = 0; i < expCount; i++)
                 {
-                    algorithm.InitializeAlgorithm(nodes[k][i]);
+                    algorithm.InitializeAlgorithm(nodes[k][i], algorithmParameters);
 
                     int[] bestRes = stepStartVal;
                     for (int j = 1; j < iterations; j++)

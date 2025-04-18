@@ -54,9 +54,11 @@ namespace API.Classes.TSP
             return pheromone;
         }
 
-        public override void InitializeAlgorithm(Vector2[] nodes)
+        public override void InitializeAlgorithm(Vector2[] nodes, AlgorithmParameters algorithmParameters)
         {
-            base.InitializeAlgorithm(nodes);
+            base.InitializeAlgorithm(nodes, algorithmParameters);
+            alpha = algorithmParameters.alpha;
+            beta = algorithmParameters.beta;
             problemSize = nodes.Length;
             minPheromone = 1.0 / (problemSize * problemSize);
             maxPheromone = 1.0 - 1 / problemSize;

@@ -10,9 +10,9 @@ namespace API.Classes.TSP
         int m = 0;
         float c = 0.00001f;
         float alpha = 0;
-        public override void InitializeAlgorithm(Vector2[] nodes)
+        public override void InitializeAlgorithm(Vector2[] nodes, AlgorithmParameters algorithmParameters)
         {
-            base.InitializeAlgorithm(nodes);
+            base.InitializeAlgorithm(nodes, algorithmParameters);
             m = nodes.Length*20;
             temperature = m*m;
             alpha = 1 - 1 / (c * m * m);

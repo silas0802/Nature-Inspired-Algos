@@ -25,7 +25,7 @@ namespace API.Controllers
                 return BadRequest($"Iterations must be between 0 and {TSPSimulation.MAX_ITERATIONS}");
             }
             
-            simulation.SetParametersForDetailed(parameters.ProblemSize, parameters.Iterations, parameters.AlgorithmI);
+            simulation.SetParametersForDetailed(new AlgorithmParameters( parameters.ProblemSize, parameters.Iterations, parameters.AlgorithmI, parameters.Alpha, parameters.Beta));
             (float[][], int[][][], float[][])? result = simulation.RunDetailedExperiment();
             if (result == null)
             {
@@ -54,7 +54,7 @@ namespace API.Controllers
                 return BadRequest("Invalid algorithm(s) selected");
             }
             
-            simulation.SetParametersForMultiExperiment(parameters.MaxProblemSize, parameters.Iterations, parameters.ExpCount, parameters.ExpSteps, parameters.AlgorithmI);
+            simulation.SetParametersForMultiExperiment(new AlgorithmParameters(parameters.MaxProblemSize, parameters.Iterations, parameters.AlgorithmI, parameters.ExpCount, parameters.ExpSteps, parameters.Alpha, parameters.Beta));
             float[][]? result = simulation.RunComparisonExperiment();
 
             if (result == null)
@@ -68,6 +68,8 @@ namespace API.Controllers
             public int ProblemSize { get; set; }
             public int AlgorithmI { get; set; }
             public int Iterations { get; set; }
+            public float Alpha { get; set; }
+            public float Beta { get; set; }
         }
         public class TSPExpParameters
         {
@@ -77,6 +79,9 @@ namespace API.Controllers
             public int AlgorithmI { get; set; }
             public int ExpCount { get; set; }
             public int ExpSteps { get; set; }
+            public float Alpha { get; set; }
+            public float Beta { get; set; }
+
         }
         public class TSPRunResult
         {
@@ -101,5 +106,7 @@ namespace API.Controllers
                 this.results = results;
             }
         }
+
+        
     }
 }
