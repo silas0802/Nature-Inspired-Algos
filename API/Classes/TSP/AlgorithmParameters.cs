@@ -5,8 +5,8 @@
         public int problemSize;
         public int iterations;
         public int algorithmI;
-        public int ExpCount;
-        public int ExpSteps;
+        public int expCount;
+        public int expSteps;
         public float alpha;
         public float beta;
         public AlgorithmParameters(int problemSize, int iterations, int algorithmI, float alpha, float beta)
@@ -20,8 +20,8 @@
         public AlgorithmParameters(int problemSize, int iterations, int algorithmI, int expCount, int expSteps, float alpha, float beta)
             : this(problemSize, iterations, algorithmI, alpha, beta)
         {
-            this.ExpCount = expCount;
-            this.ExpSteps = expSteps;
+            this.expCount = expCount;
+            this.expSteps = expSteps;
         }
     }
 }

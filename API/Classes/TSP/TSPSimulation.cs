@@ -30,10 +30,11 @@ namespace API.Classes.TSP
         public void SetParametersForMultiExperiment(AlgorithmParameters algorithmParameters)
         {
             SetParametersForDetailed(algorithmParameters);
-            this.expCount = expCount;
-            this.expSteps = expSteps;
+            this.expCount = algorithmParameters.expCount;
+            this.expSteps = algorithmParameters.expSteps;
         }
         
+
         public (float[][], int[][][], float[][]) RunDetailedExperiment()
         {
             
@@ -158,11 +159,10 @@ namespace API.Classes.TSP
                     for (int j = 1; j < iterations; j++)
                     {
                         int[] mutatedRes = algorithm.Mutate(bestRes);
-                        if (Utility.TSPCompare(nodes[k][i], bestRes, mutatedRes))
+                        if (Utility.TSPCompare(nodes[k][i], mutatedRes, bestRes))
                         {
                             bestRes = mutatedRes;
                         }
-
 
                         
                         if (j == iterations - 1)
