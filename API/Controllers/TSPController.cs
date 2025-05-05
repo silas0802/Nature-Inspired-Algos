@@ -1,5 +1,7 @@
-﻿using API.Classes.TSP;
+﻿using API.Classes.Generic;
+using API.Classes.TSP;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace API.Controllers
 {
@@ -12,7 +14,7 @@ namespace API.Controllers
         [HttpPost("TSPRun")]
         public ActionResult<TSPRunResult> TSPRun([FromBody] TSPRunParameters parameters)
         {
-            if (parameters.ProblemSize <= 0 || parameters.ProblemSize > TSPSimulation.MAX_PROBLEM_SIZE)
+            if ((parameters.ProblemSize <= 0 || parameters.ProblemSize > TSPSimulation.MAX_PROBLEM_SIZE) && parameters.Nodes == null)
             {
                 return BadRequest($"N must be between 1 and {TSPSimulation.MAX_PROBLEM_SIZE}");
             }
@@ -24,8 +26,16 @@ namespace API.Controllers
             {
                 return BadRequest($"Iterations must be between 0 and {TSPSimulation.MAX_ITERATIONS}");
             }
-            
-            simulation.SetParametersForDetailed(new AlgorithmParameters( parameters.ProblemSize, parameters.Iterations, parameters.AlgorithmI, parameters.Alpha, parameters.Beta));
+            if (parameters.Nodes != null)
+            {
+                Debug.WriteLine($"Nodes: {Utility.DisplayAnyList(parameters.Nodes)}");
+                simulation.SetParametersForDetailed(new AlgorithmParameters(parameters.Nodes, parameters.Iterations, parameters.AlgorithmI, parameters.Alpha, parameters.Beta));
+            }
+            else
+            {
+
+                simulation.SetParametersForDetailed(new AlgorithmParameters( parameters.ProblemSize, parameters.Iterations, parameters.AlgorithmI, parameters.Alpha, parameters.Beta));
+            }
             (float[][], int[][][], float[][])? result = simulation.RunDetailedExperiment();
             if (result == null)
             {
@@ -68,6 +78,7 @@ namespace API.Controllers
             public int ProblemSize { get; set; }
             public int AlgorithmI { get; set; }
             public int Iterations { get; set; }
+            public float[][]? Nodes { get; set; } = null;
             public float Alpha { get; set; }
             public float Beta { get; set; }
         }

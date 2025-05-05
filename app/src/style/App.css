@@ -24,6 +24,15 @@ select, input, button {
   outline: none; /* Remove the default outline */
   max-width: 400px; /* Set a maximum width to prevent them from becoming too large */
 }
+.cancel {
+  background-color: #f44336; /* Red background for cancel button */
+  
+}
+.cancel:hover {
+  background-color: #d32f2f; /* Darker red on hover */
+  color: white; /* White text on hover */
+  cursor: pointer; /* Show pointer cursor on hover */
+}
 
 /* Hover effect for buttons */
 button:hover {

@@ -9,10 +9,12 @@ namespace API.Classes.TSP
         public new const int MAX_PROBLEM_SIZE = 1000;
         public new const int MAX_ITERATIONS = 5000;
         public int iterations;
+        public Vector2[] nodes = null!;
         private AlgorithmParameters? algorithmParameters;
         public void SetParametersForDetailed(AlgorithmParameters algorithmParameters)
         {
-            this.problemSize = algorithmParameters.problemSize;
+            this.nodes = algorithmParameters.nodes;
+            this.problemSize = nodes==null ? algorithmParameters.problemSize : nodes.Length;
             this.iterations = algorithmParameters.iterations;
             this.algorithmI = algorithmParameters.algorithmI;
             this.expCount = 1;
@@ -40,7 +42,8 @@ namespace API.Classes.TSP
             
             int bitstring = algorithmI;
             int[][][] result = new int[Utility.CountSetBits((ulong)algorithmI)][][];
-            Vector2[] nodes = Utility.GenerateRandomGraph(problemSize, 500, 500);
+            Vector2[] selectedNodes = this.nodes == null ? Utility.GenerateRandomGraph(problemSize, 500, 500) : this.nodes;
+            
             
 
             int currentAlgo = 0;
@@ -50,7 +53,7 @@ namespace API.Classes.TSP
             {
                 if ((algorithmI & 1 << i) != 0)
                 {
-                    result[currentAlgo] = RunDetailedSimulation(startValue, nodes, GetAlgorithm(i));
+                    result[currentAlgo] = RunDetailedSimulation(startValue, selectedNodes, GetAlgorithm(i));
                     currentAlgo++;
                 }
 
@@ -65,11 +68,11 @@ namespace API.Classes.TSP
                 distances[i] = new float[result[i].Length];
                 for (int j = 0; j < distances[i].Length; j++) // For each iteration
                 {
-                    distances[i][j] = Utility.TSPCalculateDistance(nodes, result[i][j]);
+                    distances[i][j] = Utility.TSPCalculateDistance(selectedNodes, result[i][j]);
                 }
             }
 
-            return (Utility.ConvertVectorsToFloatArray(nodes), result, distances);
+            return (Utility.ConvertVectorsToFloatArray(selectedNodes), result, distances);
 
         }
 

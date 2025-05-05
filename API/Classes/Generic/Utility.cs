@@ -60,7 +60,7 @@ namespace API.Classes.Generic
             return DisplayAnyListRecursive(list, 0);
         }
 
-        public static string DisplayAnyListRecursive<T>(T[] list, int depth)
+        private static string DisplayAnyListRecursive<T>(T[] list, int depth)
         {
             string indent = new string(' ', depth * 2);
             string result = "";
@@ -92,6 +92,15 @@ namespace API.Classes.Generic
                 result[i] = new float[2];
                 result[i][0] = vector[i].X;
                 result[i][1] = vector[i].Y;
+            }
+            return result;
+        }
+        public static Vector2[] ConvertFloatArrayToVectors(float[][] array)
+        {
+            Vector2[] result = new Vector2[array.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = new Vector2(array[i][0], array[i][1]);
             }
             return result;
         }

@@ -20,6 +20,7 @@ const TSPPage = () => {
   const [diagramPoints, setDiagramPoints] = useState([]);
   const [graphData, setGraphData] = useState([]);
   const [tableData, setTableData] = useState([]);
+  const [uploadedTSPCoordinates, setUploadedTSPCoordinates] = useState([]);
   
   function getLabels(){
     let labels = [];
@@ -107,6 +108,9 @@ const TSPPage = () => {
         algorithmI: algorithms,
         iterations: iterations,
     };
+    if (uploadedTSPCoordinates.length > 0) {
+      parameters.nodes = uploadedTSPCoordinates; 
+    }
 
     // Fetch data from the server
     const response = await fetch(endPointURL, {
@@ -173,6 +177,7 @@ const TSPPage = () => {
     setTableData([]);
     setGraphData([]);
     setDiagramPoints([]);
+    setUploadedTSPCoordinates([]);
   }
 
   async function handleStepByStep(problemSize, algorithms, iterations){
@@ -293,6 +298,102 @@ const TSPPage = () => {
     }
   };
 
+  // Add this function to your TSPPage component
+const handleTSPFileUpload = () => {
+  // Create a hidden file input element
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = '.tsp';
+  fileInput.style.display = 'none';
+  document.body.appendChild(fileInput);
+  
+  // Add change listener to process the file when selected
+  fileInput.addEventListener('change', async (event) => {
+    const file = event.target.files[0];
+    if (!file) {
+      document.body.removeChild(fileInput);
+      return;
+    }
+    
+    try {
+      const text = await file.text();
+      const coordinates = parseTSPFile(text);
+      
+      if (coordinates.length > 0) {
+        // Update state with the parsed coordinates
+        setUploadedTSPCoordinates(coordinates);
+        
+        // Update problem size input with the number of nodes
+        const problemSizeInput = document.getElementById('problemSize');
+        if (problemSizeInput) {
+          problemSizeInput.value = coordinates.length;
+        }
+        
+        alert(`Successfully loaded ${coordinates.length} nodes from ${file.name}`);
+      } else {
+        alert('No valid coordinates found in the file.');
+      }
+    } catch (error) {
+      console.error('Error reading TSP file:', error);
+      alert('Error reading the TSP file. Please check the file format.');
+    }
+    
+    document.body.removeChild(fileInput);
+  });
+  
+  // Trigger the file dialog
+  fileInput.click();
+};
+
+// Function to parse TSP file format
+const parseTSPFile = (fileContent) => {
+  const coordinates = [];
+  const lines = fileContent.split('\n');
+  
+  // Find the NODE_COORD_SECTION marker
+  let coordSectionStarted = false;
+  let dimension = 0;
+  
+  // Extract dimension if available
+  const dimensionMatch = fileContent.match(/DIMENSION\s*:\s*(\d+)/);
+  if (dimensionMatch) {
+    dimension = parseInt(dimensionMatch[1], 10);
+  }
+  
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    
+    // Check for the start of coordinates section
+    if (trimmedLine === 'NODE_COORD_SECTION') {
+      coordSectionStarted = true;
+      continue;
+    }
+    
+    // Stop parsing if we hit EOF or another section
+    if (coordSectionStarted && (trimmedLine === 'EOF' || trimmedLine.includes('_SECTION'))) {
+      break;
+    }
+    
+    // Parse coordinate lines
+    if (coordSectionStarted) {
+      // Match patterns like: "1 0.00000e+00 0.00000e+00"
+      const match = trimmedLine.match(/^\s*\d+\s+(-?\d+\.?\d*e?[+-]?\d*)\s+(-?\d+\.?\d*e?[+-]?\d*)/);
+      if (match) {
+        const x = parseFloat(match[1]);
+        const y = parseFloat(match[2]);
+        coordinates.push([x, y]);
+      }
+    }
+  }
+  
+  // Validate that we found the expected number of nodes
+  if (dimension > 0 && coordinates.length !== dimension) {
+    console.warn(`Warning: Found ${coordinates.length} nodes but dimension specified ${dimension}`);
+  }
+  
+  return coordinates;
+};
+
   return (
     <div>
       <h1>Travelling Salesman Problem</h1>
@@ -309,7 +410,11 @@ const TSPPage = () => {
             <label htmlFor="iterationCount">Iterations:</label>
             <input type="number" id="iterationCount" defaultValue={500} />
             <label htmlFor="problemSize">Problem Size:</label>
-            <input type="number" id="problemSize" defaultValue={8} />
+            <div style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: "5px"}}>
+              <input type="number" id="problemSize" defaultValue={8} />
+              {uploadedTSPCoordinates.length===0 &&<button id="upload" onClick={handleTSPFileUpload}>Upload TSP File</button>}
+              {uploadedTSPCoordinates.length>0 &&<button className= "cancel" onClick={() => setUploadedTSPCoordinates([])} >Remove TSP File</button>}
+            </div>
             {parseInt(expType) === 2 && <label htmlFor="expCount">Exp Count:</label>}
             {parseInt(expType) === 2 && <input type="number" id="expCount" defaultValue={5} />}
             {parseInt(expType) === 2 && <label htmlFor="expSteps">Exp Steps:</label>}
