@@ -12,27 +12,30 @@ namespace API.Classes.TSP
         public int expSteps;
         public float alpha;
         public float beta;
+        public int coolingRate;
         public Vector2[] nodes;
 
-        public AlgorithmParameters(float[][] nodes, int iterations, int algorithmI, float alpha, float beta)
+        public AlgorithmParameters(float[][] nodes, int iterations, int algorithmI, float alpha, float beta, int coolingRate)
         {
             this.nodes = Utility.ConvertFloatArrayToVectors(nodes);
             this.iterations = iterations;
             this.algorithmI = algorithmI;
             this.alpha = alpha;
             this.beta = beta;
+            this.coolingRate = coolingRate;
         }
-        public AlgorithmParameters(int problemSize, int iterations, int algorithmI, float alpha, float beta)
+        public AlgorithmParameters(int problemSize, int iterations, int algorithmI, float alpha, float beta, int coolingRate)
         {
             this.problemSize = problemSize;
             this.iterations = iterations;
             this.algorithmI = algorithmI;
             this.alpha = alpha;
             this.beta = beta;
+            this.coolingRate = coolingRate;
             this.nodes = null!;
         }
-        public AlgorithmParameters(int problemSize, int iterations, int algorithmI, int expCount, int expSteps, float alpha, float beta)
-            : this(problemSize, iterations, algorithmI, alpha, beta)
+        public AlgorithmParameters(int problemSize, int iterations, int algorithmI, int expCount, int expSteps, float alpha, float beta, int coolingRate)
+            : this(problemSize, iterations, algorithmI, alpha, beta, coolingRate)
         {
             this.expCount = expCount;
             this.expSteps = expSteps;
