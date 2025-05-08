@@ -1,4 +1,5 @@
 ﻿using API.Classes.Generic;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace API.Classes.TSP
@@ -8,14 +9,13 @@ namespace API.Classes.TSP
         Random random = new Random();
         double temperature = 0f;
         int m = 0;
-        float c = 0.00001f;
-        float alpha = 0;
+        double alpha = 0;
         public override void InitializeAlgorithm(Vector2[] nodes, AlgorithmParameters algorithmParameters)
         {
             base.InitializeAlgorithm(nodes, algorithmParameters);
             m = nodes.Length*20;
             temperature = m*m;
-            alpha = 1 - 1 / (c * m * m);
+            alpha = 1.0f - algorithmParameters.coolingRate / temperature;
             
         }
         public override int[] Mutate(int[] original)

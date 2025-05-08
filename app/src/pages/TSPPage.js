@@ -64,7 +64,6 @@ const TSPPage = () => {
     
     return allPoints;
   }
-
   function performancesToTable(perflist){
     var tableData = [];
     const steps = perflist[0].length;
@@ -107,6 +106,9 @@ const TSPPage = () => {
         problemSize: problemSize,
         algorithmI: algorithms,
         iterations: iterations,
+        alpha: mmasChecked ? parseFloat(document.getElementById('alpha').value) : 0,
+        beta: mmasChecked ? parseFloat(document.getElementById('beta').value) : 0,
+        coolingRate: simAnnealChecked ? parseFloat(document.getElementById('cooling').value) : 0,
     };
     if (uploadedTSPCoordinates.length > 0) {
       parameters.nodes = uploadedTSPCoordinates; 
@@ -143,6 +145,9 @@ const TSPPage = () => {
         maxProblemSize: problemSize,
         iterations: iterations,
         algorithmI: algorithms,
+        alpha: mmasChecked ? parseFloat(document.getElementById('alpha').value) : 0,
+        beta: mmasChecked ? parseFloat(document.getElementById('beta').value) : 0,
+        coolingRate: simAnnealChecked ? parseFloat(document.getElementById('cooling').value) : 0,
         expCount: expCount,
         expSteps: expSteps
     };
@@ -454,6 +459,8 @@ const parseTSPFile = (fileContent) => {
           </div>
           <div className="parameters tsp-algoparams">
             <h2 style={{opacity: 0}}>{": "}</h2>
+            {simAnnealChecked && <label htmlFor="cooling">Cooling Rate</label>}
+            {simAnnealChecked && <input type="number" id="cooling" defaultValue={1000} />}
             {mmasChecked && <label htmlFor="alpha">MMAS Alpha</label>}
             {mmasChecked && <input type="number" id="alpha" defaultValue={1} />}
             {mmasChecked && <label htmlFor="beta">MMAS Beta</label>}

@@ -4,12 +4,12 @@ namespace API.Classes.Generic
 {
     public class Simulation
     {
-        public const int MAX_PROBLEM_SIZE = 1000;
-        public const int MAX_EXPERIMENT_COUNT = 1000;
-        public const int MAX_EXPERIMENT_STEPS = 30;
+        public const int MAX_PROBLEM_SIZE = 5000;
+        public const int MAX_ITERATIONS = 100000;
+        public const int MAX_EXPERIMENT_COUNT = 200;
+        public const int MAX_EXPERIMENT_STEPS = 100;
         public const int ALGORITHM_COUNT = 3;
         public const int PROBLEM_COUNT = 2;
-        public const int MAX_ITERATIONS = 50000;
         private int _problemSize;
         private int _algorithmI;
         private int _expCount;

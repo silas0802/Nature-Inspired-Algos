@@ -7,7 +7,7 @@ namespace API.Classes.TSP
     public class TSPSimulation : Simulation
     {
         public new const int MAX_PROBLEM_SIZE = 1000;
-        public new const int MAX_ITERATIONS = 5000;
+        public new const int MAX_ITERATIONS = 50000;
         public int iterations;
         public Vector2[] nodes = null!;
         private AlgorithmParameters? algorithmParameters;
