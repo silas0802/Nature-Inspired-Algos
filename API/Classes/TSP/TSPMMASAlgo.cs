@@ -54,7 +54,7 @@ namespace API.Classes.TSP
             beta = algorithmParameters.beta;
             problemSize = nodes.Length;
             minPheromone = 1.0 / (problemSize * problemSize);
-            maxPheromone = 1.0 - 1 / problemSize;
+            maxPheromone = 1.0 - 1.0 / (problemSize * problemSize);
             pheromone = InitializePheromone(problemSize);
 
             distancePowers = new double[problemSize, problemSize];
