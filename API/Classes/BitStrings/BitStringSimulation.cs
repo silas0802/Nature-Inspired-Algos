@@ -71,7 +71,6 @@ namespace API.Classes.BitStrings
                 }
 
             }
-            Debug.WriteLine($"Experiment finished with start value: {{{string.Join(',', startValue)}}}");
             Debug.WriteLine($"Result:\n{Utility.DisplayAnyList(result)}");
             return result;
 
@@ -124,18 +123,19 @@ namespace API.Classes.BitStrings
             bool fail = false;
             for (int k = 1; k < expSteps+1; k++)
             {
-                int[] stepStartVal = Utility.CloneBitArrayPart(startValue, problemSize*(k)/expSteps);
+                int stepProblemSize = problemSize * (k) / expSteps;
                 int[] stepResults = new int[expCount];
                 for (int i = 0; i < expCount; i++)
                 {
-                algorithm.InitializeAlgorithm(stepStartVal.Length);
+                    int[]startVal = Utility.InitializeRandomBinaryString(stepProblemSize);
+                    algorithm.InitializeAlgorithm(startVal.Length);
                     if (fail)
                     {
                         stepResults[i] = MAX_ITERATIONS;
                         continue;
                     }
 
-                    int[] bestRes = stepStartVal;
+                    int[] bestRes = startVal;
                     for (int j = 1; j < MAX_ITERATIONS; j++)
                     {
                         int[] mutatedRes = algorithm.Mutate(bestRes);
@@ -153,7 +153,7 @@ namespace API.Classes.BitStrings
                         }
                         if (j == MAX_ITERATIONS - 1)
                         {
-                            Debug.WriteLine($"Failed to find a solution in time for problemsize {stepStartVal.Length}");
+                            Debug.WriteLine($"Failed to find a solution in time for problemsize {startVal.Length}");
                             
                             stepResults[i] = MAX_ITERATIONS;
                             fail = true;
@@ -164,7 +164,7 @@ namespace API.Classes.BitStrings
                     
                 }
                 results[k] = (float)stepResults.Sum() / expCount;
-                Debug.WriteLine($"For problemsize {stepStartVal.Length} Average: {results[k]}");
+                Debug.WriteLine($"For problemsize {stepProblemSize} Average: {results[k]}");
             }
             return results;
         }

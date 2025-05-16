@@ -7,7 +7,6 @@ namespace API.Classes.TSP
     {
         private Random random = new Random();
         public double[,] pheromone = new double[0, 0];
-        public int numAnts = 1; // Number of ants
         public double alpha = 1;
         public double beta = 1;
         public double rho = 1f; // Pheromone evaporation rate
@@ -22,22 +21,16 @@ namespace API.Classes.TSP
             int[] bestSolution = original;
             double bestFitness = Utility.TSPCalculateDistance(nodes, original);
 
-            int[][] solutions = new int[numAnts][];
-            double[] fitnesses = new double[numAnts];
+            int[] newSolution = ConstructSolution();
+            float newFitness = Utility.TSPCalculateDistance(nodes, newSolution);
 
-            // Evaluate solutions
-            for (int k = 0; k < numAnts; k++)
+            if (newFitness < bestFitness)
             {
-                solutions[k] = ConstructSolution();
-                fitnesses[k] = Utility.TSPCalculateDistance(nodes, solutions[k]);
-                if (fitnesses[k] < bestFitness)
-                {
-                    bestSolution = solutions[k];
-                    bestFitness = fitnesses[k];
-                }
+                bestSolution = newSolution;
+                bestFitness = newFitness;
             }
 
-            UpdatePheromone(solutions, fitnesses, bestSolution, bestFitness);
+            UpdatePheromone(bestSolution, bestFitness);
             return bestSolution;
         }
 
@@ -48,7 +41,7 @@ namespace API.Classes.TSP
             {
                 for (int j = 0; j < length; j++)
                 {
-                    pheromone[i, j] = 0.5f; // Initial pheromone level
+                    pheromone[i, j] = 1/length; // Initial pheromone level
                 }
             }
             return pheromone;
@@ -94,7 +87,7 @@ namespace API.Classes.TSP
                 {
                     if (i != j)
                     {
-                        pheromonePowers[i, j] = Math.Pow(pheromone[i, j], alpha);
+                        pheromonePowers[i, j] = Math.Exp(alpha * Math.Log(pheromone[i, j]));
                     }
                 }
             }
@@ -132,7 +125,7 @@ namespace API.Classes.TSP
             return solution;
         }
 
-        public void UpdatePheromone(int[][] solutions, double[] fitnesses, int[] bestSolution, double bestFitness)
+        public void UpdatePheromone(int[] bestSolution, double bestFitness)
         {
             // Evaporate pheromone
             for (int i = 0; i < problemSize; i++)

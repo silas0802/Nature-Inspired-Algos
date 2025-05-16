@@ -6,7 +6,6 @@
         private BitProblem selectedProblem;
         public double[,] pheromone = new double[0,0];
         private int problemSize = 0; // Length of the binary string
-        public int numAnts = 1; // Number of ants
         public double rho = 1f; // Pheromone evaporation rate
         public double minPheromone = 0; // Lowest pheromone level
         public double maxPheromone = 0; // Highest pheromone level 
@@ -15,31 +14,15 @@
         {
             this.selectedProblem = selectedProblem;
         }
-        public override int[] Mutate(int[] original)
+        
+        public override void InitializeAlgorithm(int problemSize)
         {
-            int[] bestSolution = original;
-            int bestFitness = selectedProblem.EvaluateFitness(original);
-
-            int[][] solutions = new int[numAnts][];
-            int[] fitnesses = new int[numAnts];
-
-            // Evaluate solutions
-            for (int k = 0; k < numAnts; k++)
-            {
-                solutions[k] = ConstructSolution();
-                fitnesses[k] = selectedProblem.EvaluateFitness((solutions[k]));
-                if (fitnesses[k] > bestFitness)
-                {
-                    bestSolution = solutions[k];
-                    bestFitness = fitnesses[k];
-                }
-            }
-
-            UpdatePheromone(solutions, fitnesses, bestSolution, bestFitness);
-            return bestSolution;
+            this.problemSize = problemSize;
+            this.minPheromone = 1 / (float)problemSize;
+            this.maxPheromone = 1 - this.minPheromone;
+            this.rho = MathF.Log(problemSize);
+            pheromone = InitializePheromone(problemSize);
         }
-        
-        
 
         public double[,] InitializePheromone(int length)
         {
@@ -50,6 +33,22 @@
                 pheromone[i, 1] = 0.5f; // Pheromone for bit 1
             }
             return pheromone;
+        }
+        public override int[] Mutate(int[] original)
+        {
+            int[] bestSolution = original;
+            int bestFitness = selectedProblem.EvaluateFitness(original);
+
+            int[] solution = ConstructSolution();
+            int fitness = selectedProblem.EvaluateFitness(solution);
+            if (fitness > bestFitness)
+            {
+                bestSolution = solution;
+                bestFitness = fitness;
+            }
+
+            UpdatePheromone(bestSolution);
+            return bestSolution;
         }
 
         public int[] ConstructSolution()
@@ -74,13 +73,13 @@
             return solution;
         }
 
-        public void UpdatePheromone(int[][] solutions, int[] fitnesses, int[] bestSolution, int bestFitness)
+        public void UpdatePheromone(int[] bestSolution)
         {
             // Evaporate pheromone
             for (int i = 0; i < problemSize; i++)
             {
-                pheromone[i, 0] *= (1 - rho);
-                pheromone[i, 1] *= (1 - rho);
+                pheromone[i, 0] *= 1-rho;
+                pheromone[i, 1] *= 1-rho;
                 pheromone[i, 0] = Math.Max(pheromone[i, 0], minPheromone);
                 pheromone[i, 1] = Math.Max(pheromone[i, 1], minPheromone);
             }
@@ -101,12 +100,5 @@
             }
         }
 
-        public override void InitializeAlgorithm(int problemSize)
-        {
-            this.problemSize = problemSize;
-            this.minPheromone = 1 / (float)problemSize;
-            this.maxPheromone = 1 - this.minPheromone;
-            pheromone = InitializePheromone(problemSize);
-        }
     }
 }

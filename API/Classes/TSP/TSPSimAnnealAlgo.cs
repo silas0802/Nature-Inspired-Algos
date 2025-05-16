@@ -16,6 +16,7 @@ namespace API.Classes.TSP
             m = nodes.Length*20;
             temperature = m*m;
             alpha = 1.0f - algorithmParameters.coolingRate / temperature;
+            //Debug.WriteLine($"Temperature: {temperature}, Alpha: {alpha}");
             
         }
         public override int[] Mutate(int[] original)

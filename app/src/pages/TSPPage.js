@@ -3,6 +3,7 @@ import CoordinateSystem from '../components/CoordinateSystem';
 import '../style/TSPPage.css';
 import Table from '../components/Table';
 import Graph from '../components/Graph';
+import LoadingOverlay from '../components/LoadingOverlay';
 const TSPPage = () => {
 
   const BACKEND_URL = 'https://localhost:7143/';
@@ -21,6 +22,7 @@ const TSPPage = () => {
   const [graphData, setGraphData] = useState([]);
   const [tableData, setTableData] = useState([]);
   const [uploadedTSPCoordinates, setUploadedTSPCoordinates] = useState([]);
+  const [loading, setLoading] = useState(false);
   
   function getLabels(){
     let labels = [];
@@ -92,15 +94,7 @@ const TSPPage = () => {
   }
 
   async function fetchTSPRun(problemSize, algorithms, iterations) {
-    if (!problemSize || problemSize <= 0 || problemSize > 1000) {
-      alert('Bit amount must be between 1 and 1000');
-      return;
-    }
-    if (algorithms === 0){
-      alert('At least one algorithm must be selected');
-      return;
-    }
-
+    
     const endPointURL = BACKEND_URL+'TSP/TSPRun';
     const parameters = {
         problemSize: problemSize,
@@ -124,22 +118,16 @@ const TSPPage = () => {
         mode: 'cors' // Ensure CORS is enabled
     });
     if (!response.ok) {
-      throw new Error('Network response was not ok');
+      alert("Error: " + response.statusText);
+
+      throw new Error('Network response was not ok\n' + response.statusText);
     }
     const data = await response.json();
     return data;
   }
 
   async function fetchTSPExp(problemSize, expCount, expSteps, algorithms, iterations) {
-    if (!problemSize || problemSize <= 0 || problemSize > 1000) {
-      alert('Bit amount must be between 1 and 1000');
-      return;
-    }
-    if (algorithms === 0){
-      alert('At least one algorithm must be selected');
-      return;
-    }
-
+    
     const endPointURL = BACKEND_URL+'TSP/TSPExp';
     const parameters = {
         maxProblemSize: problemSize,
@@ -163,7 +151,8 @@ const TSPPage = () => {
     });
 
     if (!response.ok) {
-      throw new Error('Network response was not ok ' + response.statusText);
+      alert("Error: " + response.statusText);
+      throw new Error('Network response was not ok\n ' + response.statusText);
     }
     const data = await response.json();
     console.log(data);
@@ -188,6 +177,7 @@ const TSPPage = () => {
   async function handleStepByStep(problemSize, algorithms, iterations){
     if (stepCount === 0){
       try {
+        setLoading(true);
         setLabels(getLabels());
         const data = await fetchTSPRun(problemSize, algorithms, iterations);
         // Handle the response data as needed
@@ -209,6 +199,9 @@ const TSPPage = () => {
       } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
         
+      }
+      finally {
+        setLoading(false);
       }
     }
     else{
@@ -240,6 +233,7 @@ const TSPPage = () => {
   }
   async function handleDetailedRunComparison(problemSize, algorithms, iterations){
     try {
+      setLoading(true);
       setLabels(getLabels());
       const data = await fetchTSPRun(problemSize, algorithms, iterations);
       // Handle the response data as needed
@@ -261,9 +255,13 @@ const TSPPage = () => {
       console.error('There was a problem with the fetch operation:', error);
       
     }
+    finally {
+      setLoading(false);
+    }
   }
   async function handlePerformanceComparison(bitAmount, expCount, expSteps, algorithms, iterations){
     try {
+      setLoading(true);
       setLabels(getLabels());
       const data = await fetchTSPExp(bitAmount, expCount, expSteps, algorithms, iterations);
       // Handle the response data as needed
@@ -275,6 +273,9 @@ const TSPPage = () => {
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);
       
+    }
+    finally {
+      setLoading(false);
     }
   }
 
@@ -401,9 +402,10 @@ const parseTSPFile = (fileContent) => {
 
   return (
     <div>
+      {loading && <LoadingOverlay />}
       <h1>Travelling Salesman Problem</h1>
       <div id="content"> 
-        <div class="tsp-top-grid">
+        <div className="tsp-top-grid">
           <div className='parameters tsp-parameters'>
             <h2>Parameters</h2>
             <label htmlFor="experimentType">Experiment Type:</label>

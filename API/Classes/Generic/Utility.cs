@@ -28,12 +28,7 @@ namespace API.Classes.Generic
         }
         public static int CountSetBits(int[] bitarray)
         {
-            int count = 0;
-            for (int i = 0; i < bitarray.Length; i++)
-            {
-                count += bitarray[i];
-            }
-            return count;
+            return bitarray.AsParallel().Sum();
         }
         public static int[] InitializeRandomBinaryString(int length)
         {
@@ -140,7 +135,7 @@ namespace API.Classes.Generic
         }
         public static bool TSPCompare(Vector2[] nodes, int[] mutated, int[] original)
         {
-            return TSPCalculateDistance(nodes, mutated) < TSPCalculateDistance(nodes, original);
+            return TSPCalculateDistance(nodes, mutated) <= TSPCalculateDistance(nodes, original);
         }
 
         public static int[] TSPOpt2(int[] original)
@@ -159,20 +154,56 @@ namespace API.Classes.Generic
             return path.ToArray();
 
         }
-        public static int[] TSPOpt3(int[] original)
+        public static List<int[]> TSPOpt3(int[] original)
         {
             List<int> path = original.ToList();
             int length = original.Length;
+
+            // Select three random indices
             int i1 = random.Next(0, length);
             int i2 = random.Next(0, length);
-            int subStart = Math.Min(i1, i2);
-            int subEnd = Math.Max(i1, i2);
-            List<int> substring = path.GetRange(subStart, subEnd - subStart + 1); //Get substring
-            path.RemoveRange(subStart, subEnd - subStart + 1);//Pick out substring
-            path.InsertRange(random.Next(0, path.Count), substring); //Insert substring somewhere randomly
+            int i3 = random.Next(0, length);
 
-            return path.ToArray();
+            // Ensure indices are sorted
+            List<int> indices = new List<int> { i1, i2, i3 };
+            indices.Sort();
+
+            int subStart1 = indices[0];
+            int subEnd1 = indices[1];
+            int subStart2 = indices[1];
+            int subEnd2 = indices[2];
+
+            // Extract three segments
+            List<int> segment1 = path.GetRange(0, subStart1);
+            List<int> segment2 = path.GetRange(subStart1, subEnd1 - subStart1 + 1);
+            List<int> segment3 = path.GetRange(subEnd1, subEnd2 - subEnd1 + 1);
+            List<int> segment4 = path.GetRange(subEnd2, length - subEnd2);
+
+            // Reverse segments for possible recombinations
+            List<int> reversedSegment2 = new List<int>(segment2);
+            reversedSegment2.Reverse();
+            List<int> reversedSegment3 = new List<int>(segment3);
+            reversedSegment3.Reverse();
+
+            // Generate all possible recombinations
+            List<int[]> possiblePaths = new List<int[]>
+        {
+            segment1.Concat(segment2).Concat(segment3).Concat(segment4).ToArray(), // Original order
+            segment1.Concat(reversedSegment2).Concat(segment3).Concat(segment4).ToArray(), // Reverse segment2
+            segment1.Concat(segment2).Concat(reversedSegment3).Concat(segment4).ToArray(), // Reverse segment3
+            segment1.Concat(reversedSegment2).Concat(reversedSegment3).Concat(segment4).ToArray(), // Reverse both
+            segment1.Concat(segment3).Concat(segment2).Concat(segment4).ToArray(), // Swap segment2 and segment3
+            segment1.Concat(reversedSegment3).Concat(reversedSegment2).Concat(segment4).ToArray() // Swap & reverse both
+        };
+
+            return possiblePaths;
         }
+
+        public static int[] BestTSPOfList(List<int[]> list, Vector2[] nodes)
+        {
+            list.Sort((a,b) => TSPCalculateDistance(nodes, a).CompareTo(TSPCalculateDistance(nodes, b)));
+            return list[0];
+        }  
 
         public static bool ValidateTSPSolution(int[] solution)
         {

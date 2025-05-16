@@ -1,4 +1,5 @@
 ﻿using API.Classes.Generic;
+using System.Numerics;
 
 namespace API.Classes.TSP
 {
@@ -10,13 +11,13 @@ namespace API.Classes.TSP
         {
             //Select 2-opt or 3-opt operator with probablity 0.5 respectively as mutation operator
 
-            int[] mutated = random.Next(2) == 0 ? Utility.TSPOpt2(original) : Utility.TSPOpt3(original);
+            int[] mutated = random.Next(2) == 0 ? Utility.TSPOpt2(original) : Utility.BestTSPOfList(Utility.TSPOpt3(original),nodes);
 
-            //If the mutated solution is better than the original, return it, otherwise return the original
-            return Utility.TSPCompare(nodes, mutated, original) ? mutated : original;
+            //If the mutated solution is at least as good as the original, return it, otherwise return the original
+            return Utility.TSPCalculateDistance(nodes, mutated) <= Utility.TSPCalculateDistance(nodes, original) ? mutated : original;
 
         }
 
-        
+
     }
 }

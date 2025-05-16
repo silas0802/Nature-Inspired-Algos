@@ -34,7 +34,7 @@ namespace API.Controllers
             else
             {
 
-                simulation.SetParametersForDetailed(new AlgorithmParameters( parameters.ProblemSize, parameters.Iterations, parameters.AlgorithmI, parameters.Alpha, parameters.Beta, parameters.CoolingRate));
+                simulation.SetParametersForDetailed(new AlgorithmParameters(parameters.ProblemSize, parameters.Iterations, parameters.AlgorithmI, parameters.Alpha, parameters.Beta, parameters.CoolingRate));
             }
             (float[][], int[][][], float[][])? result = simulation.RunDetailedExperiment();
             if (result == null)

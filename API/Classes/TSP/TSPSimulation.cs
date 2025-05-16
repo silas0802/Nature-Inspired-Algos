@@ -131,7 +131,10 @@ namespace API.Classes.TSP
                 int[] bestRes = result[result.Count - 1];
                 int[] mutatedRes = algorithm.Mutate(bestRes);
                 result.Add(mutatedRes);
-                
+                if (i % 500 == 0)
+                {
+                    Debug.WriteLine($"Running... {(int)((float)(i+1)/iterations*100)}%");
+                }
                 //Debug.WriteLine($"Iteration {i}: {Utility.CountSetBits(result[result.Count - 1])}");
 
             }

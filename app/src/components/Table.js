@@ -1,6 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const Table = ({ rows, labels, stepCount, firstColName }) => {
+  const [isReversed, setIsReversed] = useState(false);
+
+  const toggleReverse = () => {
+    setIsReversed(!isReversed);
+  };
+
   const downloadCSV = () => {
     // Create headers row
     const headers = [firstColName, ...labels].join(',');
@@ -33,20 +39,33 @@ const Table = ({ rows, labels, stepCount, firstColName }) => {
         <table className="bit-table">
           <thead>
             <tr>
-              <th>{firstColName}<button onClick={downloadCSV} style={{marginLeft: 10}}>Download CSV</button></th>
+              <th>
+                {firstColName}
+                <button 
+                  onClick={toggleReverse} 
+                  style={{marginLeft: 5, marginRight: 5, cursor: 'pointer'}}
+                  title={isReversed ? "Switch to ascending" : "Switch to descending"}
+                >
+                  {isReversed ? '↑' : '↓'}
+                </button>
+                <button onClick={downloadCSV} style={{marginLeft: 5}}>Download CSV</button>
+              </th>
               {labels.map((label, index) => (
                 <th key={index}>{label}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {rows.slice(0, stepCount || rows.length).reverse().map((row, rowIndex) => (
-              <tr key={rowIndex}>
-                {row.map((cell, cellIndex) => (
-                  <td key={cellIndex}>{cell}</td>
-                ))}
-              </tr>
-            ))}
+            {rows.slice(0, stepCount || rows.length)
+              .slice()  // Create a copy to avoid mutating the original array
+              [isReversed ? 'reverse' : 'slice']()  // Conditionally reverse
+              .map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  {row.map((cell, cellIndex) => (
+                    <td key={cellIndex}>{cell}</td>
+                  ))}
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
