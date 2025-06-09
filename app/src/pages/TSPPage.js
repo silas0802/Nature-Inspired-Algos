@@ -6,7 +6,9 @@ import Graph from '../components/Graph';
 import LoadingOverlay from '../components/LoadingOverlay';
 const TSPPage = () => {
 
-  const BACKEND_URL = 'https://localhost:7143/';
+  const BACKEND_URL = process.env.NODE_ENV === 'production' 
+    ? 'https://localhost:5000/' 
+    : 'https://localhost:7143/';
 
   const [eaChecked, setEaChecked] = useState(true);
   const [simAnnealChecked, setSimAnnealChecked] = useState(false);
@@ -102,6 +104,7 @@ const TSPPage = () => {
         iterations: iterations,
         alpha: mmasChecked ? parseFloat(document.getElementById('alpha').value) : 0,
         beta: mmasChecked ? parseFloat(document.getElementById('beta').value) : 0,
+        rho: mmasChecked ? parseFloat(document.getElementById('rho').value) : 0,
         coolingRate: simAnnealChecked ? parseFloat(document.getElementById('cooling').value) : 0,
     };
     if (uploadedTSPCoordinates.length > 0) {
@@ -135,6 +138,7 @@ const TSPPage = () => {
         algorithmI: algorithms,
         alpha: mmasChecked ? parseFloat(document.getElementById('alpha').value) : 0,
         beta: mmasChecked ? parseFloat(document.getElementById('beta').value) : 0,
+        rho: mmasChecked ? parseFloat(document.getElementById('rho').value) : 0,
         coolingRate: simAnnealChecked ? parseFloat(document.getElementById('cooling').value) : 0,
         expCount: expCount,
         expSteps: expSteps
@@ -467,6 +471,8 @@ const parseTSPFile = (fileContent) => {
             {mmasChecked && <input type="number" id="alpha" defaultValue={1} />}
             {mmasChecked && <label htmlFor="beta">MMAS Beta</label>}
             {mmasChecked && <input type="number" id="beta" defaultValue={1} />}
+            {mmasChecked && <label htmlFor="rho">MMAS Rho</label>}
+            {mmasChecked && <input type="number" id="rho" defaultValue={1} />}
           </div>
           {diagramPoints.length>0 && <CoordinateSystem points={diagramPoints} labels={labels} />}
           {graphData.length > 0 && <Graph className={"tsp-graph"} graphs={graphData} stepCount={stepCount} labels={labels} xName={expType!==2 ? "Iteration" : "Problem Size"} yName={"Distance"} noPoints/>}

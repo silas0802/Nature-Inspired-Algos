@@ -40,7 +40,6 @@ namespace API.Classes.TSP
         public (float[][], int[][][], float[][]) RunDetailedExperiment()
         {
             
-            int bitstring = algorithmI;
             int[][][] result = new int[Utility.CountSetBits((ulong)algorithmI)][][];
             Vector2[] selectedNodes = this.nodes == null ? Utility.GenerateRandomGraph(problemSize, 500, 500) : this.nodes;
             
@@ -87,15 +86,15 @@ namespace API.Classes.TSP
 
             int bitstring = algorithmI;
             float[][] result = new float[Utility.CountSetBits((ulong)algorithmI)][];
-            Vector2[][][] nodes = new Vector2[expSteps][][];
-            for (int i = 0; i < expSteps; i++)
-            {
-                nodes[i] = new Vector2[expCount][];
-                for (int j = 0; j < expCount; j++)
-                {
-                    nodes[i][j] = Utility.GenerateRandomGraph(problemSize/expSteps*(i+1), 500, 500);
-                }
-            }
+            //Vector2[][][] nodes = new Vector2[expSteps][][];
+            //for (int i = 0; i < expSteps; i++)
+            //{
+            //    nodes[i] = new Vector2[expCount][];
+            //    for (int j = 0; j < expCount; j++)
+            //    {
+            //        nodes[i][j] = Utility.GenerateRandomGraph(problemSize/expSteps*(i+1), 500, 500);
+            //    }
+            //}
 
             int currentAlgo = 0;
 
@@ -104,7 +103,8 @@ namespace API.Classes.TSP
             {
                 if ((algorithmI & 1 << i) != 0)
                 {
-                    result[currentAlgo] = RunMultiSimulation(startValue,nodes,GetAlgorithm(i));
+                    //result[currentAlgo] = RunMultiSimulation(startValue,nodes,GetAlgorithm(i));
+                    result[currentAlgo] = RunMultiSimulation(startValue, GetAlgorithm(i));
                     currentAlgo++;
                 }
 
@@ -147,7 +147,7 @@ namespace API.Classes.TSP
         /// <param name="startValue">The initial path</param>
         /// <param name="algorithm">The selected algorithm</param>
         /// <returns>A list of average number of iterations to solve the problem at each problemsize.</returns>
-        public float[] RunMultiSimulation(int[] startValue, Vector2[][][] nodes, TSPAlgorithm algorithm)
+        public float[] RunMultiSimulation(int[] startValue, TSPAlgorithm algorithm)
         {
             if (algorithmParameters == null) throw new NullReferenceException("Algorithm parameters must be set before experiment");
             
@@ -155,30 +155,22 @@ namespace API.Classes.TSP
 
             for (int k = 0; k < expSteps; k++)
             {
-                int[] stepStartVal = Utility.RandomTSPSolution(nodes[k][0].Length);
+                int stepProblemSize = problemSize / expSteps * (k + 1);
                 float[] stepResults = new float[expCount];
                 for (int i = 0; i < expCount; i++)
                 {
-                    algorithm.InitializeAlgorithm(nodes[k][i], algorithmParameters);
+                    Vector2[] nodes = Utility.GenerateRandomGraph(stepProblemSize, 500, 500);
+                    algorithm.InitializeAlgorithm(nodes, algorithmParameters);
 
-                    int[] bestRes = stepStartVal;
+                    int[] bestRes = Utility.RandomTSPSolution(nodes.Length);
                     for (int j = 1; j < iterations; j++)
                     {
-                        int[] mutatedRes = algorithm.Mutate(bestRes);
-                        if (Utility.TSPCompare(nodes[k][i], mutatedRes, bestRes))
-                        {
-                            bestRes = mutatedRes;
-                        }
-
-                        
-                        if (j == iterations - 1)
-                        {
-                            stepResults[i] = Utility.TSPCalculateDistance(nodes[k][i],bestRes);
-                        }
+                        bestRes = algorithm.Mutate(bestRes);
                     }
+                    stepResults[i] = Utility.TSPCalculateDistance(nodes, bestRes);
                 }
                 results[k+1] = (float)stepResults.Sum() / expCount;
-                Debug.WriteLine($"For problemsize {stepStartVal.Length} Average: {results[k+1]} ");
+                Debug.WriteLine($"For problemsize {stepProblemSize} Average: {results[k+1]} ");
             }
             return results;
         }

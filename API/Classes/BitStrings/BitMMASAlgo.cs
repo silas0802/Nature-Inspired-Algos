@@ -20,7 +20,7 @@
             this.problemSize = problemSize;
             this.minPheromone = 1 / (float)problemSize;
             this.maxPheromone = 1 - this.minPheromone;
-            this.rho = MathF.Log(problemSize);
+            this.rho = 0.5f;  //MathF.Log(problemSize);
             pheromone = InitializePheromone(problemSize);
         }
 

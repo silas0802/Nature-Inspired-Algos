@@ -52,11 +52,11 @@ namespace API.Classes.TSP
             base.InitializeAlgorithm(nodes, algorithmParameters);
             alpha = algorithmParameters.alpha;
             beta = algorithmParameters.beta;
+            rho = algorithmParameters.rho;
             problemSize = nodes.Length;
             minPheromone = 1.0 / (problemSize * problemSize);
             maxPheromone = 1.0 - 1.0 / problemSize;
             pheromone = InitializePheromone(problemSize);
-
             distancePowers = new double[problemSize, problemSize];
             for (int i = 0; i < problemSize; i++)
             {

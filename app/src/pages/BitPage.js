@@ -6,6 +6,12 @@ import BitDiagram from "../components/BitDiagram";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 const BitPage = () => {
+
+    const BACKEND_URL = process.env.NODE_ENV === 'production' 
+    ? 'http://localhost:5000/' 
+    : 'https://localhost:7143/';
+
+
     const [eaChecked, setEaChecked] = useState(true);
     const [rlsChecked, setRlsChecked] = useState(false);
     const [mmasChecked, setMmasChecked] = useState(false);
@@ -263,7 +269,7 @@ const BitPage = () => {
     };
 
     async function fetchBitStringRun(bitAmount, algorithms, problem) {
-        const url = `https://localhost:7143/Bit/BitstringRun?problemSize=${bitAmount}&algorithmI=${algorithms}&problemI=${problem}`;
+        const url = `${BACKEND_URL}Bit/BitstringRun?problemSize=${bitAmount}&algorithmI=${algorithms}&problemI=${problem}`;
         // Fetch data from the server
         const response = await fetch(url, {
             method: "GET",
@@ -289,7 +295,7 @@ const BitPage = () => {
         algorithms,
         problem
     ) {
-        const url = `https://localhost:7143/Bit/BitstringExp?maxProblemSize=${bitAmount}&expCount=${expCount}&expSteps=${expSteps}&algorithmI=${algorithms}&problemI=${problem}`;
+        const url = `${BACKEND_URL}Bit/BitstringExp?maxProblemSize=${bitAmount}&expCount=${expCount}&expSteps=${expSteps}&algorithmI=${algorithms}&problemI=${problem}`;
         // Fetch data from the server
         const response = await fetch(url, {
             method: "GET",

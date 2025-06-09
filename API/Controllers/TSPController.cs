@@ -29,12 +29,12 @@ namespace API.Controllers
             if (parameters.Nodes != null)
             {
                 Debug.WriteLine($"Nodes: {Utility.DisplayAnyList(parameters.Nodes)}");
-                simulation.SetParametersForDetailed(new AlgorithmParameters(parameters.Nodes, parameters.Iterations, parameters.AlgorithmI, parameters.Alpha, parameters.Beta, parameters.CoolingRate));
+                simulation.SetParametersForDetailed(new AlgorithmParameters(parameters.Nodes, parameters.Iterations, parameters.AlgorithmI, parameters.Alpha, parameters.Beta, parameters.Rho, parameters.CoolingRate));
             }
             else
             {
 
-                simulation.SetParametersForDetailed(new AlgorithmParameters(parameters.ProblemSize, parameters.Iterations, parameters.AlgorithmI, parameters.Alpha, parameters.Beta, parameters.CoolingRate));
+                simulation.SetParametersForDetailed(new AlgorithmParameters(parameters.ProblemSize, parameters.Iterations, parameters.AlgorithmI, parameters.Alpha, parameters.Beta, parameters.Rho, parameters.CoolingRate));
             }
             (float[][], int[][][], float[][])? result = simulation.RunDetailedExperiment();
             if (result == null)
@@ -64,7 +64,7 @@ namespace API.Controllers
                 return BadRequest("Invalid algorithm(s) selected");
             }
             
-            simulation.SetParametersForMultiExperiment(new AlgorithmParameters(parameters.MaxProblemSize, parameters.Iterations, parameters.AlgorithmI, parameters.ExpCount, parameters.ExpSteps, parameters.Alpha, parameters.Beta, parameters.CoolingRate));
+            simulation.SetParametersForMultiExperiment(new AlgorithmParameters(parameters.MaxProblemSize, parameters.Iterations, parameters.AlgorithmI, parameters.ExpCount, parameters.ExpSteps, parameters.Alpha, parameters.Beta, parameters.Rho, parameters.CoolingRate));
             float[][]? result = simulation.RunComparisonExperiment();
 
             if (result == null)
@@ -81,6 +81,7 @@ namespace API.Controllers
             public float[][]? Nodes { get; set; } = null;
             public float Alpha { get; set; }
             public float Beta { get; set; }
+            public float Rho { get; set; }
             public int CoolingRate { get; set; }
         }
         public class TSPExpParameters
@@ -93,6 +94,7 @@ namespace API.Controllers
             public int ExpSteps { get; set; }
             public float Alpha { get; set; }
             public float Beta { get; set; }
+            public float Rho { get; set; }
             public int CoolingRate { get; set; }
 
 
