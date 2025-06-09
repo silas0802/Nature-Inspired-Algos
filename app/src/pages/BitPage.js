@@ -7,9 +7,7 @@ import LoadingOverlay from "../components/LoadingOverlay";
 
 const BitPage = () => {
 
-    const BACKEND_URL = process.env.NODE_ENV === 'production' 
-    ? 'http://localhost:5000/' 
-    : 'https://localhost:7143/';
+    const BACKEND_URL = 'http://localhost:5000/';
 
 
     const [eaChecked, setEaChecked] = useState(true);
